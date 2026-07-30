@@ -453,7 +453,7 @@ export function AIChatStudio({
                 <div className="text-zinc-300 text-[11px] leading-relaxed">{lastInjectedInfo.whyReason}</div>
               </div>
 
-              <div className="bg-[#05070B] rounded-lg border border-white/10 overflow-hidden font-mono text-[11px]">
+              <div className="bg-[#05070B] rounded-lg border border-white/10 overflow-x-auto font-mono text-[11px]">
                 <table className="w-full text-left">
                   <thead className="bg-white/5 border-b border-white/10 text-zinc-400 text-[10px] uppercase">
                     <tr>

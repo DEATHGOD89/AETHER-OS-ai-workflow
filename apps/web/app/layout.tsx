@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -11,6 +11,14 @@ export const metadata: Metadata = {
   },
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -19,10 +27,11 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
         <link rel="icon" href="/logo.png?v=2" type="image/png" />
         <link rel="apple-touch-icon" href="/logo.png?v=2" />
       </head>
-      <body className="bg-[#05070B] text-white antialiased selection:bg-white selection:text-black">
+      <body className="bg-[#05070B] text-white antialiased selection:bg-white selection:text-black min-h-screen min-h-[100dvh] overflow-x-hidden">
         {children}
       </body>
     </html>

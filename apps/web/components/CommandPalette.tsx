@@ -40,13 +40,13 @@ export function CommandPalette({ isOpen, onClose, onSelectTab }: CommandPaletteP
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-24 bg-black/80 backdrop-blur-md animate-in fade-in duration-150">
-      <div className="w-full max-w-xl bg-[#0D1117] border border-white/10 rounded-xl shadow-2xl overflow-hidden glass-panel">
-        <div className="flex items-center px-4 py-3 border-b border-white/10 bg-[#080A0F]">
-          <Search className="w-4 h-4 text-[#3B82F6] mr-3 shrink-0" strokeWidth={1.75} />
+    <div className="fixed inset-0 z-50 flex items-start justify-center pt-12 sm:pt-24 p-2 sm:p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-150">
+      <div className="w-[95vw] max-w-xl max-h-[85dvh] flex flex-col bg-[#0D1117] border border-white/10 rounded-xl shadow-2xl overflow-hidden glass-panel">
+        <div className="flex items-center px-4 py-3 border-b border-white/10 bg-[#080A0F] shrink-0">
+          <Search className="w-4 h-4 text-emerald-400 mr-3 shrink-0" strokeWidth={1.75} />
           <input
             type="text"
-            placeholder="Search actions, open studio, ask AI... (Press Esc to close)"
+            placeholder="Search actions, open studio, ask AI... (Esc to close)"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             autoFocus
@@ -57,7 +57,7 @@ export function CommandPalette({ isOpen, onClose, onSelectTab }: CommandPaletteP
           </button>
         </div>
 
-        <div className="max-h-80 overflow-y-auto p-2">
+        <div className="max-h-[60dvh] overflow-y-auto p-2 flex-1">
           {filtered.length === 0 ? (
             <div className="p-6 text-center text-xs text-zinc-500">No matching commands found.</div>
           ) : (
@@ -73,7 +73,7 @@ export function CommandPalette({ isOpen, onClose, onSelectTab }: CommandPaletteP
                   className="w-full flex items-center justify-between p-2.5 rounded-lg hover:bg-white/5 transition-colors text-left group"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="p-1.5 rounded-md bg-[#05070B] border border-white/10 text-[#3B82F6]">
+                    <div className="p-1.5 rounded-md bg-[#05070B] border border-white/10 text-emerald-400">
                       <Icon className="w-4 h-4" strokeWidth={1.75} />
                     </div>
                     <div>
@@ -92,7 +92,7 @@ export function CommandPalette({ isOpen, onClose, onSelectTab }: CommandPaletteP
           )}
         </div>
 
-        <div className="flex items-center justify-between px-4 py-2 bg-[#080A0F] border-t border-white/10 text-[10px] text-zinc-500 font-mono">
+        <div className="flex items-center justify-between px-4 py-2 bg-[#080A0F] border-t border-white/10 text-[10px] text-zinc-500 font-mono shrink-0">
           <span>Tip: Press <kbd className="px-1 bg-zinc-800 rounded text-zinc-300">Esc</kbd> to exit</span>
           <span>Aether OS v1.0</span>
         </div>
