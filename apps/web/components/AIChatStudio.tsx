@@ -269,12 +269,15 @@ export function AIChatStudio({
         { role: "user", content: userMsgText },
       ];
 
+      const userApiKey = typeof window !== "undefined" ? localStorage.getItem("aether_openrouter_api_key") || "" : "";
+
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           model: selectedModel,
           messages: historyPayload,
+          apiKey: userApiKey,
         }),
         signal: abortControllerRef.current.signal,
       });
