@@ -38,6 +38,7 @@ import {
   Wand2,
   ListTodo,
   Key,
+  Menu,
 } from "lucide-react";
 import { CommandPalette } from "@/components/CommandPalette";
 import { AIChatStudio } from "@/components/AIChatStudio";
@@ -50,7 +51,7 @@ import { IntroSplashScreen } from "@/components/IntroSplashScreen";
 export default function FullyCollapsibleAetherOS() {
   const [showIntro, setShowIntro] = useState(true);
   const [isCommandOpen, setIsCommandOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<"workspace" | "chat" | "code" | "creative" | "rag" | "workflow">("workspace");
+  const [activeTab, setActiveTab] = useState<"workspace" | "chat" | "code" | "creative" | "rag" | "workflow" | "inspector">("workspace");
   const [showInspectorModal, setShowInspectorModal] = useState(false);
   const [showNewProjectModal, setShowNewProjectModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
@@ -59,6 +60,9 @@ export default function FullyCollapsibleAetherOS() {
   // Settings State
   const [customApiKey, setCustomApiKey] = useState("");
   const [savedApiKeyMsg, setSavedApiKeyMsg] = useState(false);
+
+  // Mobile Drawer State
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Phase 1 Modals: Launch Event, AI Pre-flight Review, and Version Checkpoint Diffs
   const [showPreflightModal, setShowPreflightModal] = useState(false);
@@ -453,7 +457,7 @@ export default function FullyCollapsibleAetherOS() {
           {/* Settings Modal */}
           {showSettingsModal && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-in fade-in duration-150">
-              <div className="w-full max-w-md bg-[#0D1117] border border-white/10 rounded-xl p-6 space-y-4 os-panel relative shadow-2xl">
+              <div className="w-[95vw] max-w-md bg-[#0D1117] border border-white/10 rounded-xl p-5 sm:p-6 space-y-4 os-panel relative shadow-2xl">
                 <button onClick={() => setShowSettingsModal(false)} className="absolute top-4 right-4 text-zinc-400 hover:text-white">
                   <X className="w-4 h-4" />
                 </button>
@@ -509,7 +513,7 @@ export default function FullyCollapsibleAetherOS() {
           {/* AI Pre-Flight Review & Deploy Modal */}
           {showPreflightModal && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-in fade-in duration-150">
-              <div className="w-full max-w-lg bg-[#0D1117] border border-white/10 rounded-xl p-6 space-y-4 os-panel relative shadow-2xl">
+              <div className="w-[95vw] max-w-lg bg-[#0D1117] border border-white/10 rounded-xl p-5 sm:p-6 space-y-4 os-panel relative shadow-2xl">
                 <button onClick={() => setShowPreflightModal(false)} className="absolute top-4 right-4 text-zinc-400 hover:text-white">
                   <X className="w-4 h-4" />
                 </button>
@@ -580,7 +584,7 @@ export default function FullyCollapsibleAetherOS() {
                         className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 hover:bg-emerald-500 hover:text-black font-mono text-xs font-semibold transition-all disabled:opacity-50"
                       >
                         {isFixingPreflight ? <Sparkles className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
-                        <span>{isFixingPreflight ? "Applying Auto-Fixes..." : "Auto-Fix Pre-Flight Issues"}</span>
+                        <span>{isFixingPreflight ? "Applying..." : "Auto-Fix Issues"}</span>
                       </button>
 
                       <button
@@ -588,7 +592,7 @@ export default function FullyCollapsibleAetherOS() {
                         className="flex items-center gap-2 px-5 py-2 rounded-lg bg-white hover:bg-zinc-200 text-black font-extrabold text-xs shadow-lg transition-all cursor-pointer"
                       >
                         <Rocket className="w-4 h-4" />
-                        <span>Launch Production Release →</span>
+                        <span>Launch Release →</span>
                       </button>
                     </div>
                   </>
@@ -600,7 +604,7 @@ export default function FullyCollapsibleAetherOS() {
           {/* Deployment Success Modal */}
           {showDeploySuccessModal && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-in fade-in duration-150">
-              <div className="w-full max-w-md bg-[#0D1117] border border-emerald-500/40 rounded-xl p-6 space-y-5 os-panel text-center relative shadow-2xl">
+              <div className="w-[95vw] max-w-md bg-[#0D1117] border border-emerald-500/40 rounded-xl p-5 sm:p-6 space-y-5 os-panel text-center relative shadow-2xl">
                 <div className="w-16 h-16 rounded-2xl bg-emerald-500/20 border border-emerald-500/50 text-emerald-400 flex items-center justify-center mx-auto shadow-2xl">
                   <Rocket className="w-8 h-8" />
                 </div>
@@ -637,7 +641,7 @@ export default function FullyCollapsibleAetherOS() {
                     onClick={handleCopyUrl}
                     className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white font-semibold text-xs border border-white/10 transition-all"
                   >
-                    <Copy className="w-3.5 h-3.5" /> {copiedUrl ? "Copied!" : "Copy Link"}
+                    <Copy className="w-3.5 h-3.5" /> {copiedUrl ? "Copied!" : "Copy"}
                   </button>
                   <button
                     onClick={() => alert(`Share URL copied: ${deployedUrl}`)}
@@ -657,7 +661,7 @@ export default function FullyCollapsibleAetherOS() {
           {/* Version Checkpoints Timeline Modal */}
           {showVersionModal && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-in fade-in duration-150">
-              <div className="w-full max-w-lg bg-[#0D1117] border border-white/10 rounded-xl p-6 space-y-4 os-panel relative shadow-2xl">
+              <div className="w-[95vw] max-w-lg bg-[#0D1117] border border-white/10 rounded-xl p-5 sm:p-6 space-y-4 os-panel relative shadow-2xl">
                 <button onClick={() => setShowVersionModal(false)} className="absolute top-4 right-4 text-zinc-400 hover:text-white">
                   <X className="w-4 h-4" />
                 </button>
@@ -668,7 +672,7 @@ export default function FullyCollapsibleAetherOS() {
                   Inspect feature additions or rollback to previous AI state checkpoints:
                 </p>
 
-                <div className="space-y-3 font-mono text-xs">
+                <div className="space-y-3 font-mono text-xs max-h-[60vh] overflow-y-auto">
                   {versionHistory.map((ver) => (
                     <div
                       key={ver.id}
@@ -717,7 +721,7 @@ export default function FullyCollapsibleAetherOS() {
           {/* Intelligent Production Starter Kits & AI Customization Wizard Modal */}
           {showNewProjectModal && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-in fade-in duration-150">
-              <div className="w-full max-w-xl bg-[#0D1117] border border-white/10 rounded-xl p-6 space-y-4 os-panel relative shadow-2xl overflow-y-auto max-h-[90vh]">
+              <div className="w-[95vw] max-w-xl bg-[#0D1117] border border-white/10 rounded-xl p-5 sm:p-6 space-y-4 os-panel relative shadow-2xl overflow-y-auto max-h-[90vh]">
                 <button onClick={() => setShowNewProjectModal(false)} className="absolute top-4 right-4 text-zinc-400 hover:text-white">
                   <X className="w-4 h-4" />
                 </button>
@@ -751,7 +755,7 @@ export default function FullyCollapsibleAetherOS() {
                     {/* Visual Template Cards */}
                     <div>
                       <div className="text-xs font-semibold text-white mb-2">1. Choose a Production Starter Kit</div>
-                      <div className="grid grid-cols-2 gap-2 text-xs font-sans">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-sans">
                         {projectTemplates.map((tpl) => (
                           <button
                             key={tpl.name}
@@ -779,7 +783,7 @@ export default function FullyCollapsibleAetherOS() {
                     <div className="space-y-3 pt-2 border-t border-white/10">
                       <div className="text-xs font-semibold text-white">2. Personalize Parameters</div>
 
-                      <div className="grid grid-cols-2 gap-3 text-xs">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                         <div>
                           <label className="text-zinc-400 font-medium mb-1 block">Project / Product Name</label>
                           <input
@@ -800,7 +804,7 @@ export default function FullyCollapsibleAetherOS() {
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-3 text-xs">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                         <div>
                           <label className="text-zinc-400 font-medium mb-1 block">Primary Goal</label>
                           <select
@@ -837,7 +841,7 @@ export default function FullyCollapsibleAetherOS() {
                       </button>
                       <button onClick={handleCreateProject} className="btn-primary flex items-center gap-1.5">
                         <Sparkles className="w-3.5 h-3.5" />
-                        <span>Generate & Launch Starter Kit</span>
+                        <span>Launch Starter Kit</span>
                       </button>
                     </div>
                   </>
@@ -849,7 +853,7 @@ export default function FullyCollapsibleAetherOS() {
           {/* Context Evidence Inspector Modal */}
           {showInspectorModal && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-150">
-              <div className="w-full max-w-lg bg-[#0D1117] border border-white/10 rounded-xl p-6 space-y-4 os-panel relative shadow-2xl">
+              <div className="w-[95vw] max-w-lg bg-[#0D1117] border border-white/10 rounded-xl p-5 sm:p-6 space-y-4 os-panel relative shadow-2xl">
                 <button onClick={() => setShowInspectorModal(false)} className="absolute top-4 right-4 text-zinc-400 hover:text-white">
                   <X className="w-4 h-4" />
                 </button>
@@ -876,25 +880,34 @@ export default function FullyCollapsibleAetherOS() {
             </div>
           )}
 
-          {/* Top Header */}
-          <header className="h-13 border-b border-white/5 bg-[#080A0F]/90 backdrop-blur-md px-4 flex items-center justify-between shrink-0 z-30 flex-wrap gap-2">
-            <div className="flex items-center gap-3">
-              {/* Toggle Hide Workspace Sidebar Button */}
+          {/* Top Header Bar */}
+          <header className="h-13 border-b border-white/5 bg-[#080A0F]/90 backdrop-blur-md px-3 sm:px-4 flex items-center justify-between shrink-0 z-30 flex-wrap gap-2">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+              {/* Desktop Toggle Hide Workspace Sidebar Button */}
               <button
                 onClick={() => setIsSidebarOpen((prev) => !prev)}
-                className="p-1.5 rounded-lg bg-white/5 border border-white/10 hover:bg-white hover:text-black text-white transition-all shadow-sm"
+                className="hidden md:flex p-1.5 rounded-lg bg-white/5 border border-white/10 hover:bg-white hover:text-black text-white transition-all shadow-sm"
                 title={isSidebarOpen ? "Hide Workspace Sidebar" : "Show Workspace Sidebar"}
               >
                 {isSidebarOpen ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeftOpen className="w-4 h-4" />}
               </button>
 
+              {/* Mobile Drawer Navigation Toggle Button */}
+              <button
+                onClick={() => setMobileMenuOpen((prev) => !prev)}
+                className="md:hidden p-1.5 rounded-lg bg-white/5 border border-white/10 text-white"
+                title="Toggle Mobile Menu"
+              >
+                <Menu className="w-4 h-4" />
+              </button>
+
               {/* User Custom Logo Brand Header */}
-              <div className="flex items-center gap-2.5">
-                <img src="/logo.png?v=2" alt="Aether OS Logo" className="h-9 w-auto max-w-[180px] object-contain" />
-                <span className="font-bold text-xs text-white tracking-wider font-sans">AETHER OS</span>
+              <div className="flex items-center gap-2">
+                <img src="/logo.png?v=2" alt="Aether OS Logo" className="h-8 sm:h-9 w-auto max-w-[140px] sm:max-w-[180px] object-contain" />
+                <span className="font-bold text-xs text-white tracking-wider font-sans hidden sm:inline-block">AETHER OS</span>
               </div>
 
-              <div className="h-3.5 w-px bg-white/10" />
+              <div className="h-3.5 w-px bg-white/10 hidden sm:block" />
 
               {/* Editable Active Project Header Badge */}
               {isHeaderEditing ? (
@@ -907,80 +920,75 @@ export default function FullyCollapsibleAetherOS() {
                     if (e.key === "Enter") setIsHeaderEditing(false);
                   }}
                   autoFocus
-                  className="bg-[#05070B] border border-white text-xs text-white font-medium rounded px-2 py-0.5 focus:outline-none"
+                  className="bg-[#05070B] border border-white text-xs text-white font-medium rounded px-2 py-0.5 focus:outline-none w-28 sm:w-auto"
                 />
               ) : (
                 <div className="flex items-center gap-1.5">
                   <button
                     onClick={() => setIsHeaderEditing(true)}
                     title="Click to rename project"
-                    className="flex items-center gap-1.5 text-xs text-zinc-300 hover:text-white group"
+                    className="flex items-center gap-1 text-xs text-zinc-300 hover:text-white group max-w-[120px] sm:max-w-none truncate"
                   >
-                    <Folder className="w-3.5 h-3.5 text-white" strokeWidth={1.75} />
-                    <span className="font-medium">{currentProject.name}</span>
-                    <span className="text-[10px] text-zinc-500 font-mono">({currentProject.stage})</span>
-                    <Edit2 className="w-3 h-3 opacity-0 group-hover:opacity-100 text-white transition-opacity" />
+                    <Folder className="w-3.5 h-3.5 text-white shrink-0" strokeWidth={1.75} />
+                    <span className="font-medium truncate">{currentProject.name}</span>
+                    <Edit2 className="w-3 h-3 opacity-0 group-hover:opacity-100 text-white transition-opacity shrink-0 hidden sm:inline-block" />
                   </button>
 
                   <button
                     onClick={() => setShowNewProjectModal(true)}
-                    className="flex items-center gap-1 px-2 py-0.5 rounded bg-white/10 border border-white/20 text-white hover:bg-white hover:text-black transition-all text-[11px] font-medium"
+                    className="flex items-center gap-1 px-2 py-0.5 rounded bg-white/10 border border-white/20 text-white hover:bg-white hover:text-black transition-all text-[11px] font-medium shrink-0"
                   >
-                    <Plus className="w-3 h-3" /> New
+                    <Plus className="w-3 h-3" /> <span className="hidden sm:inline">New</span>
                   </button>
                 </div>
               )}
             </div>
 
-            {/* Clickable Command Search Launcher */}
+            {/* Command Search Launcher */}
             <button
               onClick={() => setIsCommandOpen(true)}
-              className="w-80 flex items-center justify-between px-3 py-1.5 rounded-lg bg-[#05070B] border border-white/10 hover:border-white/40 text-xs text-zinc-400 hover:text-zinc-200 transition-all group cursor-pointer"
+              className="hidden lg:flex w-72 xl:w-80 items-center justify-between px-3 py-1.5 rounded-lg bg-[#05070B] border border-white/10 hover:border-white/40 text-xs text-zinc-400 hover:text-zinc-200 transition-all group cursor-pointer"
             >
               <div className="flex items-center gap-2">
                 <Search className="w-3.5 h-3.5 text-white" strokeWidth={1.75} />
-                <span className="text-zinc-400 group-hover:text-zinc-200 font-normal">Search actions, ask AI, deploy...</span>
+                <span className="text-zinc-400 group-hover:text-zinc-200 font-normal">Search actions, ask AI...</span>
               </div>
               <kbd className="px-1.5 py-0.5 rounded bg-zinc-900 text-[10px] text-zinc-400 font-mono border border-zinc-700 flex items-center gap-0.5">
                 <Command className="w-3 h-3" strokeWidth={1.75} /> K
               </kbd>
             </button>
 
-            {/* Status, Version Checkpoints, and ONE-CLICK DEPLOY BUTTON */}
-            <div className="flex items-center gap-2 text-xs">
-              {/* Version Checkpoint Button */}
-              <button
-                onClick={() => setShowVersionModal(true)}
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 hover:bg-white/15 text-zinc-300 hover:text-white transition-all text-[11px] font-mono"
-                title="View Version Checkpoint History & Diffs"
-              >
-                <History className="w-3.5 h-3.5 text-emerald-400" />
-                <span>v1.0</span>
-              </button>
+            {/* Mobile Search Icon Button */}
+            <button
+              onClick={() => setIsCommandOpen(true)}
+              className="lg:hidden p-1.5 rounded-lg bg-white/5 border border-white/10 text-white"
+              title="Search"
+            >
+              <Search className="w-4 h-4" />
+            </button>
 
+            {/* Status, Version Checkpoints, and DEPLOY LIVE BUTTON */}
+            <div className="flex items-center gap-1.5 sm:gap-2 text-xs">
               {/* Explainable Project Health Score & Trend Badge */}
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-mono text-[11px]">
+              <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-mono text-[11px]">
                 <Activity className="w-3.5 h-3.5" />
                 <span className="font-bold">{projectHealth.total}/100</span>
-                <span className="text-[9px] bg-emerald-500/20 px-1 rounded flex items-center gap-0.5">
-                  <TrendingUp className="w-2.5 h-2.5" /> {projectHealth.trend}
-                </span>
               </div>
 
-              {/* 🚀 ONE-CLICK DEPLOY BUTTON */}
+              {/* 🚀 DEPLOY LIVE BUTTON */}
               <button
                 onClick={() => setShowPreflightModal(true)}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-xs shadow-lg transition-all cursor-pointer"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-xs shadow-lg transition-all cursor-pointer shrink-0"
                 title="Run AI Pre-Flight Review & Launch Production Release"
               >
                 <Rocket className="w-3.5 h-3.5 fill-current" />
                 <span>Deploy Live</span>
               </button>
 
-              {/* Toggle Hide Right Project Completion Panel Button */}
+              {/* Desktop Toggle Hide Right Project Completion Panel Button */}
               <button
                 onClick={() => setIsInspectorOpen((prev) => !prev)}
-                className="flex items-center gap-1 p-1.5 rounded-lg bg-white/5 border border-white/10 hover:bg-white hover:text-black text-white transition-all text-xs shadow-sm"
+                className="hidden md:flex items-center gap-1 p-1.5 rounded-lg bg-white/5 border border-white/10 hover:bg-white hover:text-black text-white transition-all text-xs shadow-sm"
                 title={isInspectorOpen ? "Hide Project Details Sidebar" : "Show Project Details Sidebar"}
               >
                 {isInspectorOpen ? <PanelRightClose className="w-4 h-4" /> : <PanelRightOpen className="w-4 h-4" />}
@@ -988,11 +996,64 @@ export default function FullyCollapsibleAetherOS() {
             </div>
           </header>
 
+          {/* Mobile Drawer Overlay Navigation Menu */}
+          {mobileMenuOpen && (
+            <div className="md:hidden fixed inset-0 z-40 bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-150 flex flex-col justify-between">
+              <div className="space-y-4 pt-12">
+                <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                  <span className="font-bold text-sm text-white">Aether Workspace Navigation</span>
+                  <button onClick={() => setMobileMenuOpen(false)} className="p-1 text-zinc-400 hover:text-white">
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <div className="space-y-1 font-sans text-sm">
+                  {[
+                    { id: "workspace", title: "Overview Studio", icon: LayoutDashboard },
+                    { id: "chat", title: "AI Chat Studio", icon: MessageSquareCode },
+                    { id: "code", title: "Code Workbench", icon: Code2 },
+                    { id: "creative", title: "Visual Studio", icon: Palette },
+                    { id: "rag", title: "Memory Vault", icon: Database },
+                    { id: "inspector", title: "Health Scorecard", icon: Activity },
+                  ].map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => {
+                          setActiveTab(item.id as any);
+                          setMobileMenuOpen(false);
+                        }}
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
+                          activeTab === item.id ? "bg-white text-black font-semibold" : "text-zinc-300 hover:bg-white/10"
+                        }`}
+                      >
+                        <Icon className="w-4 h-4" />
+                        <span>{item.title}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <button
+                onClick={() => {
+                  setShowSettingsModal(true);
+                  setMobileMenuOpen(false);
+                }}
+                className="btn-secondary w-full py-3 flex items-center justify-center gap-2 text-xs"
+              >
+                <Settings className="w-4 h-4" />
+                <span>Open Aether OS Settings</span>
+              </button>
+            </div>
+          )}
+
           {/* Main Resizable Operating System Workspace */}
-          <div className="flex-1 flex overflow-hidden">
-            {/* Left Side Sidebar (Collapsible with Hide/Show toggle) */}
+          <div className="flex-1 flex overflow-hidden relative">
+            {/* Desktop Left Sidebar */}
             {isSidebarOpen && (
-              <aside className="w-52 border-r border-white/5 bg-[#080A0F]/80 backdrop-blur-md p-2 flex flex-col justify-between shrink-0 transition-all duration-200 animate-in slide-in-from-left-2">
+              <aside className="hidden md:flex w-52 border-r border-white/5 bg-[#080A0F]/80 backdrop-blur-md p-2 flex-col justify-between shrink-0 transition-all duration-200">
                 <div className="space-y-4">
                   <div>
                     <div className="text-[10px] font-medium uppercase tracking-wider text-zinc-500 px-2.5 mb-1.5 flex items-center justify-between">
@@ -1060,8 +1121,8 @@ export default function FullyCollapsibleAetherOS() {
               </aside>
             )}
 
-            {/* Resizable Central Workspace Canvas Panes */}
-            <main className="flex-1 flex overflow-hidden p-2 gap-0 bg-[#05070B] relative">
+            {/* Responsive Main Canvas */}
+            <main className="flex-1 flex overflow-hidden p-1 sm:p-2 gap-0 bg-[#05070B] relative w-full">
               {activeTab === "creative" ? (
                 <div className="w-full h-full overflow-y-auto">
                   <CreativeStudio projectName={currentProject.name} />
@@ -1074,9 +1135,31 @@ export default function FullyCollapsibleAetherOS() {
                 <div className="w-full h-full overflow-hidden">
                   <CodeWorkbench projectName={currentProject.name} />
                 </div>
+              ) : activeTab === "inspector" ? (
+                <div className="w-full h-full overflow-y-auto p-4 space-y-4 font-mono text-xs">
+                  <div className="p-4 rounded-lg border border-white/10 bg-[#0D1117] space-y-3">
+                    <div className="flex items-center justify-between border-b border-white/10 pb-2">
+                      <div className="flex items-center gap-2 text-sm text-white font-bold">
+                        <Activity className="w-5 h-5 text-emerald-400" />
+                        <span>Health Scorecard Breakdown</span>
+                      </div>
+                      <div className="text-right font-bold text-emerald-400 text-base">{projectHealth.total}/100</div>
+                    </div>
+                    {projectHealth.breakdown.map((item, idx) => (
+                      <div key={idx} className="flex items-center justify-between text-zinc-300 py-1 border-b border-white/5">
+                        <span>{item.category}</span>
+                        <span className="font-bold text-emerald-400">{item.score}/{item.max}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               ) : (
                 <>
-                  <div style={{ width: `${leftWidthPercent}%` }} className="h-full pr-1 shrink-0 overflow-hidden">
+                  {/* Desktop Split View or Mobile Full Width View */}
+                  <div
+                    style={{ width: typeof window !== "undefined" && window.innerWidth < 768 ? "100%" : `${leftWidthPercent}%` }}
+                    className="h-full pr-0 md:pr-1 shrink-0 overflow-hidden w-full md:w-auto"
+                  >
                     <AIChatStudio
                       projectName={currentProject.name}
                       onRenameProject={handleRename}
@@ -1084,13 +1167,13 @@ export default function FullyCollapsibleAetherOS() {
                     />
                   </div>
 
-                  {/* Draggable Resizable Split Handle */}
+                  {/* Desktop Split Handle */}
                   <div
                     onMouseDown={(e) => {
                       e.preventDefault();
                       setIsDragging(true);
                     }}
-                    className="w-3 h-full flex items-center justify-center hover:bg-white/20 cursor-col-resize group transition-colors shrink-0 z-30 select-none"
+                    className="hidden md:flex w-3 h-full items-center justify-center hover:bg-white/20 cursor-col-resize group transition-colors shrink-0 z-30 select-none"
                     title="Drag left/right to resize panels"
                   >
                     <div className="w-1 h-10 bg-white/30 group-hover:bg-white rounded-full transition-colors" />
@@ -1098,7 +1181,7 @@ export default function FullyCollapsibleAetherOS() {
 
                   <div
                     style={{ width: `${100 - leftWidthPercent}%` }}
-                    className="h-full pl-1 flex-1 overflow-hidden"
+                    className="hidden md:flex h-full pl-1 flex-1 overflow-hidden"
                   >
                     <CodeWorkbench projectName={currentProject.name} />
                   </div>
@@ -1106,9 +1189,9 @@ export default function FullyCollapsibleAetherOS() {
               )}
             </main>
 
-            {/* Right High-Density Linear Inspector */}
+            {/* Desktop Right Inspector */}
             {isInspectorOpen && (
-              <aside className="w-64 border-l border-white/5 bg-[#080A0F]/80 backdrop-blur-md p-3.5 space-y-4 shrink-0 overflow-y-auto transition-all duration-200 animate-in slide-in-from-right-2">
+              <aside className="hidden md:flex w-64 border-l border-white/5 bg-[#080A0F]/80 backdrop-blur-md p-3.5 space-y-4 shrink-0 overflow-y-auto transition-all duration-200">
                 {/* Onboarding Next Steps Guided Checklist Panel */}
                 <div className="p-3.5 rounded-lg border border-emerald-500/30 bg-[#0D1117] space-y-2.5 font-mono text-xs">
                   <div className="flex items-center gap-1.5 text-white font-bold">
@@ -1157,7 +1240,7 @@ export default function FullyCollapsibleAetherOS() {
                   </div>
                 </div>
 
-                {/* Progress Component with Hide Button */}
+                {/* Progress Component */}
                 <div className="p-3.5 rounded-lg border border-white/5 bg-[#0D1117] space-y-2.5 relative group">
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-zinc-400 font-normal">Project Completion</span>
@@ -1191,37 +1274,6 @@ export default function FullyCollapsibleAetherOS() {
                   </div>
                 </div>
 
-                {/* Lifecycle Progress Stepper Tracker */}
-                <div className="space-y-1.5">
-                  <div className="text-[10px] font-medium uppercase tracking-wider text-zinc-500 px-1">
-                    Lifecycle Progress Tracker
-                  </div>
-                  <div className="space-y-1 text-xs font-mono">
-                    {lifecycleStages.map((st) => (
-                      <div
-                        key={st.name}
-                        className="flex items-center justify-between px-2 py-1.5 rounded text-zinc-400"
-                      >
-                        <div className="flex items-center gap-2">
-                          {st.status === "done" ? (
-                            <span className="text-[#10B981] font-bold">🟢</span>
-                          ) : st.status === "current" ? (
-                            <span className="text-amber-400 font-bold">🟡</span>
-                          ) : (
-                            <span className="text-zinc-600 font-bold">⚪</span>
-                          )}
-                          <span className={st.status === "current" ? "text-white font-medium" : st.status === "done" ? "text-zinc-300" : "text-zinc-600"}>
-                            {st.name}
-                          </span>
-                        </div>
-                        <span className={`text-[10px] ${st.status === "current" ? "text-amber-400" : st.status === "done" ? "text-emerald-400" : "text-zinc-600"}`}>
-                          {st.status === "current" ? "Active" : st.status === "done" ? "Passed" : "Queued"}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
                 {/* Context Inspector Trigger */}
                 <button
                   onClick={() => setShowInspectorModal(true)}
@@ -1233,6 +1285,31 @@ export default function FullyCollapsibleAetherOS() {
               </aside>
             )}
           </div>
+
+          {/* Mobile Touch Bottom Navigation Bar (< 768px) */}
+          <nav className="md:hidden h-14 bg-[#080A0F] border-t border-white/10 flex items-center justify-around shrink-0 px-1 z-30 font-sans">
+            {[
+              { id: "workspace", title: "AI Studio", icon: MessageSquareCode },
+              { id: "code", title: "Workbench", icon: Code2 },
+              { id: "creative", title: "Visual", icon: Palette },
+              { id: "inspector", title: "Health", icon: Activity },
+            ].map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id || (tab.id === "workspace" && activeTab === "chat");
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as any)}
+                  className={`flex flex-col items-center gap-1 py-1 px-3 rounded-lg text-[10px] transition-all ${
+                    isActive ? "text-emerald-400 font-bold" : "text-zinc-400 hover:text-white"
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />
+                  <span>{tab.title}</span>
+                </button>
+              );
+            })}
+          </nav>
         </div>
       )}
     </>

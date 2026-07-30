@@ -1,72 +1,110 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { Code, FileCode, Play, Eye, RotateCw, ExternalLink, Smartphone, Monitor, Tablet, Check, PanelLeftClose, PanelLeftOpen, Columns } from "lucide-react";
+import {
+  Code,
+  FileCode,
+  Eye,
+  RefreshCw,
+  Columns,
+  Smartphone,
+  Tablet,
+  Monitor,
+  Check,
+  Play,
+  PanelLeftClose,
+  PanelLeftOpen,
+} from "lucide-react";
 
-export function CodeWorkbench({ projectName }: { projectName: string }) {
-  const [activeFile, setActiveFile] = useState("index.html");
+export function CodeWorkbench({ projectName }: { projectName?: string }) {
   const [codeContent, setCodeContent] = useState<string>(`<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Simple Test UI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aether Live App</title>
   <style>
     body {
-      font-family: Arial, Helvetica, sans-serif;
+      font-family: 'Inter', system-ui, sans-serif;
       margin: 0;
       padding: 0;
-      background: #f5f5f5;
+      background: #05070B;
+      color: #fff;
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
+      min-height: 100vh;
     }
     header {
       width: 100%;
-      background: #1db954;
+      background: #0D1117;
+      border-b: 1px solid rgba(255,255,255,0.1);
       color: white;
-      padding: 1rem 0;
+      padding: 1rem 2rem;
       text-align: center;
-      font-size: 1.5rem;
+      font-weight: 700;
+      font-size: 1.25rem;
     }
-    .container {
-      background: white;
+    .card {
+      background: #0D1117;
+      border: 1px solid rgba(255,255,255,0.1);
+      padding: 2rem;
+      border-radius: 12px;
       margin: 2rem;
-      padding: 1.5rem;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      width: 300px;
+      max-width: 450px;
+      width: 90%;
+      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5);
     }
-    input, button {
-      padding: 0.5rem;
-      margin: 0.5rem 0;
+    input {
       width: 100%;
+      padding: 0.75rem;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: #05070B;
+      color: #fff;
+      font-size: 1rem;
+      margin-top: 0.5rem;
+      margin-bottom: 1rem;
       box-sizing: border-box;
     }
-    #result {
+    button {
+      width: 100%;
+      padding: 0.75rem;
+      border-radius: 8px;
+      border: none;
+      background: #10B981;
+      color: #000;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    button:hover {
+      background: #34D399;
+      transform: translateY(-1px);
+    }
+    .result {
       margin-top: 1rem;
-      font-weight: bold;
-      color: #1db954;
+      font-weight: 600;
+      color: #10B981;
+      text-align: center;
     }
   </style>
 </head>
 <body>
-  <header>My Test Page</header>
-
-  <div class="container">
-    <h2>Enter a number</h2>
-    <input id="numInput" type="number" placeholder="e.g., 42">
+  <header>✨ ${projectName || "My New Project"}</header>
+  <div class="card">
+    <h2 style="margin-top: 0;">Interactive Demo Calculator</h2>
+    <p style="color: #a1a1aa; font-size: 0.9rem;">Type a number to test real-time square calculation:</p>
+    <input type="number" id="numInput" placeholder="Enter number..." value="8" />
     <button id="calcBtn">Calculate Square</button>
-    <div id="result"></div>
+    <div id="result" class="result">The square of 8 is 64.</div>
   </div>
 
   <script>
     document.getElementById('calcBtn').addEventListener('click', () => {
-      const val = document.getElementById('numInput').value;
-      if (val === '') {
-        document.getElementById('result').textContent = 'Please enter a number.';
-        return;
-      }
-      const num = Number(val);
+      const num = parseFloat(document.getElementById('numInput').value) || 0;
       const square = num * num;
       document.getElementById('result').textContent = \`The square of \${num} is \${square}.\`;
     });
@@ -79,9 +117,10 @@ export function CodeWorkbench({ projectName }: { projectName: string }) {
   const [viewport, setViewport] = useState<"desktop" | "tablet" | "mobile">("desktop");
   const [previewKey, setPreviewKey] = useState(0);
   const [synced, setSynced] = useState(false);
+  const [activeFile, setActiveFile] = useState("index.html");
 
   // Toggle Hide & Resizable Files Panel State
-  const [showFileTree, setShowFileTree] = useState(true);
+  const [showFileTree, setShowFileTree] = useState(false);
   const [fileTreeWidth, setFileTreeWidth] = useState(180);
   const [isResizingFileTree, setIsResizingFileTree] = useState(false);
 
@@ -139,41 +178,36 @@ export function CodeWorkbench({ projectName }: { projectName: string }) {
     const targetCode = newCode !== undefined ? newCode : codeContent;
     localStorage.setItem("aether_live_code", targetCode);
     setPreviewKey((prev) => prev + 1);
-
-    // Notify iframe securely using current window location origin
-    const targetOrigin = typeof window !== "undefined" ? window.location.origin : "*";
-    window.postMessage({ type: "AETHER_UPDATE_CODE", code: targetCode }, targetOrigin);
-
     setSynced(true);
     setTimeout(() => setSynced(false), 2000);
+
+    const targetOrigin = typeof window !== "undefined" ? window.location.origin : "*";
+    window.postMessage({ type: "AETHER_UPDATE_CODE", code: targetCode }, targetOrigin);
   };
 
   const handleCodeChange = (val: string) => {
     setCodeContent(val);
-
-    // Debounced storage write (300ms) to eliminate keystroke lag
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
     }
     debounceTimerRef.current = setTimeout(() => {
       localStorage.setItem("aether_live_code", val);
-      // Auto-notify preview iframe in real time
       const targetOrigin = typeof window !== "undefined" ? window.location.origin : "*";
       window.postMessage({ type: "AETHER_UPDATE_CODE", code: val }, targetOrigin);
     }, 300);
   };
 
   return (
-    <div className="flex flex-col h-full bg-[#0D1117] border border-white/10 rounded-xl overflow-hidden glass-panel">
+    <div className="flex flex-col h-full bg-[#0D1117] border border-white/10 rounded-xl overflow-hidden glass-panel w-full">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5 border-b border-white/10 bg-[#080A0F] shrink-0">
-        <div className="flex items-center gap-2.5">
+      <div className="flex flex-wrap items-center justify-between gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 border-b border-white/10 bg-[#080A0F] shrink-0">
+        <div className="flex items-center gap-2 min-w-0">
           <Code className="w-4 h-4 text-white shrink-0" strokeWidth={1.75} />
-          <div className="text-xs font-semibold text-white flex items-center gap-2 truncate">
-            <span>Code Workbench</span>
-            <span className="text-[10px] px-2 py-0.5 rounded bg-white/5 border border-white/10 text-zinc-400 font-mono truncate">
+          <div className="text-xs font-semibold text-white flex items-center gap-1.5 truncate">
+            <span className="truncate">Workbench</span>
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-zinc-400 font-mono truncate hidden sm:inline-block">
               {activeTab === "split"
-                ? "Split View (Side-by-Side)"
+                ? "Split View"
                 : activeTab === "code"
                 ? activeFile
                 : "Live Web Preview"}
@@ -181,127 +215,101 @@ export function CodeWorkbench({ projectName }: { projectName: string }) {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 flex-wrap">
-          {/* Toggle Hide Project Files Panel (only in Editor & Split tab) */}
+        <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+          {/* Toggle Hide Project Files Panel */}
           {(activeTab === "code" || activeTab === "split") && (
             <button
               onClick={() => setShowFileTree((prev) => !prev)}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs bg-white/5 border border-white/10 hover:bg-white/15 text-zinc-300 transition-colors"
+              className="hidden md:flex items-center gap-1 px-2 py-1 rounded-md text-[11px] sm:text-xs bg-white/5 border border-white/10 hover:bg-white/15 text-zinc-300 transition-colors"
               title={showFileTree ? "Hide Project Files" : "Show Project Files"}
             >
               {showFileTree ? <PanelLeftClose className="w-3.5 h-3.5" /> : <PanelLeftOpen className="w-3.5 h-3.5" />}
-              <span>{showFileTree ? "Hide Files" : "Show Files"}</span>
+              <span className="hidden lg:inline">{showFileTree ? "Hide Files" : "Show Files"}</span>
             </button>
           )}
 
           {/* Run & Render Button */}
           <button
             onClick={() => handleSyncPreview()}
-            className="flex items-center gap-1.5 px-3 py-1 rounded-md text-xs bg-emerald-500 hover:bg-emerald-600 text-black font-semibold shadow-md transition-all cursor-pointer"
+            className="flex items-center gap-1 px-2.5 sm:px-3 py-1 rounded-md text-[11px] sm:text-xs bg-emerald-500 hover:bg-emerald-600 text-black font-bold shadow-md transition-all cursor-pointer shrink-0"
             title="Render code into live preview"
           >
             {synced ? <Check className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 fill-current" />}
             <span>{synced ? "Rendered!" : "Run Code"}</span>
           </button>
 
-          {/* View Mode Switcher (Editor Only / Split Side-by-Side / Live Preview Only) */}
+          {/* View Mode Switcher */}
           <div className="flex items-center bg-[#05070B] p-0.5 rounded-lg border border-white/10">
             <button
               onClick={() => setActiveTab("code")}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs transition-colors ${
+              className={`flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-md text-[11px] sm:text-xs transition-colors ${
                 activeTab === "code" ? "bg-white text-black font-semibold shadow-sm" : "text-zinc-400 hover:text-white"
               }`}
-              title="Editor Only"
             >
               <FileCode className="w-3.5 h-3.5" strokeWidth={1.75} />
-              Editor
+              <span className="hidden sm:inline">Editor</span>
             </button>
             <button
               onClick={() => {
                 handleSyncPreview();
                 setActiveTab("split");
               }}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs transition-colors ${
+              className={`hidden md:flex items-center gap-1 px-2.5 py-1 rounded-md text-xs transition-colors ${
                 activeTab === "split" ? "bg-white text-black font-semibold shadow-sm" : "text-zinc-400 hover:text-white"
               }`}
-              title="Side-by-Side Code & Live Preview with Resizable Divider"
             >
               <Columns className="w-3.5 h-3.5" strokeWidth={1.75} />
-              Split View
+              <span>Split View</span>
             </button>
             <button
               onClick={() => {
                 handleSyncPreview();
                 setActiveTab("preview");
               }}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs transition-colors ${
+              className={`flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-md text-[11px] sm:text-xs transition-colors ${
                 activeTab === "preview" ? "bg-white text-black font-semibold shadow-sm" : "text-zinc-400 hover:text-white"
               }`}
-              title="Live Preview Only"
             >
               <Eye className="w-3.5 h-3.5" strokeWidth={1.75} />
-              Preview
+              <span className="hidden sm:inline">Preview</span>
             </button>
           </div>
         </div>
       </div>
 
+      {/* Main Workbench Workspace */}
       <div className="flex-1 flex overflow-hidden relative">
-        {/* File Tree Sidebar */}
-        {(activeTab === "code" || activeTab === "split") && showFileTree && (
-          <>
-            <div
-              style={{ width: `${fileTreeWidth}px` }}
-              className="border-r border-white/10 p-2.5 space-y-2 bg-[#080A0F] font-mono text-xs shrink-0 overflow-y-auto select-none"
-            >
-              <div className="text-[10px] text-zinc-500 uppercase font-semibold tracking-wider px-2 flex items-center justify-between">
-                <span>Project Files</span>
-                <button
-                  onClick={() => setShowFileTree(false)}
-                  className="text-zinc-500 hover:text-white text-[10px]"
-                  title="Hide Project Files"
-                >
-                  Hide ✕
-                </button>
-              </div>
-              <div className="space-y-0.5">
-                {[
-                  "index.html",
-                  "apps/web/app/page.tsx",
-                  "apps/web/components/AIChatStudio.tsx",
-                  "packages/shared/src/schemas/index.ts",
-                ].map((filePath) => (
-                  <button
-                    key={filePath}
-                    onClick={() => setActiveFile(filePath)}
-                    className={`w-full flex items-center gap-2 px-2 py-1.5 rounded text-left truncate transition-colors ${
-                      activeFile === filePath
-                        ? "bg-white/10 border border-white/30 text-white font-medium"
-                        : "text-zinc-400 hover:text-white hover:bg-white/[0.03]"
-                    }`}
-                  >
-                    <FileCode className="w-3.5 h-3.5 shrink-0 text-zinc-400" strokeWidth={1.75} />
-                    <span className="truncate text-[11px] font-mono">{filePath.split("/").pop()}</span>
-                  </button>
-                ))}
-              </div>
+        {/* Project Files Panel */}
+        {showFileTree && (activeTab === "code" || activeTab === "split") && (
+          <div
+            style={{ width: `${fileTreeWidth}px` }}
+            className="hidden md:flex flex-col bg-[#080A0F] border-r border-white/10 p-2 shrink-0 select-none overflow-y-auto"
+          >
+            <div className="text-[10px] font-mono uppercase text-zinc-500 mb-2 font-semibold px-2">
+              Project Files
             </div>
-
-            {/* Draggable File Tree Resize Handle */}
-            <div
-              onMouseDown={(e) => {
-                e.preventDefault();
-                setIsResizingFileTree(true);
-              }}
-              className="w-1.5 h-full hover:bg-white/20 cursor-col-resize shrink-0 transition-colors z-20"
-              title="Drag to resize Project Files panel"
-            />
-          </>
+            <div className="space-y-0.5 text-xs font-mono">
+              {["index.html", "page.tsx", "globals.css", "schema.prisma"].map((filePath) => (
+                <button
+                  key={filePath}
+                  onClick={() => setActiveFile(filePath)}
+                  className={`w-full flex items-center gap-2 px-2 py-1.5 rounded text-left truncate transition-colors ${
+                    activeFile === filePath
+                      ? "bg-white/10 border border-white/30 text-white font-medium"
+                      : "text-zinc-400 hover:text-white hover:bg-white/[0.03]"
+                  }`}
+                >
+                  <FileCode className="w-3.5 h-3.5 shrink-0 text-zinc-400" strokeWidth={1.75} />
+                  <span className="truncate text-[11px] font-mono">{filePath}</span>
+                </button>
+              ))}
+            </div>
+          </div>
         )}
 
         {/* Dynamic Workspace Container */}
-        <div id="split-workbench-container" className="flex-1 flex bg-[#05070B] overflow-hidden relative">
-          {/* Invisible Overlay Shield during Dragging to prevent iframe mouse capture */}
+        <div id="split-workbench-container" className="flex-1 flex flex-col md:flex-row bg-[#05070B] overflow-hidden relative w-full">
+          {/* Invisible Overlay Shield during Dragging */}
           {isResizingSplit && (
             <div className="fixed inset-0 z-50 cursor-col-resize select-none" />
           )}
@@ -312,18 +320,10 @@ export function CodeWorkbench({ projectName }: { projectName: string }) {
               style={{
                 width: activeTab === "split" ? `${splitEditorWidthPercent}%` : "100%",
               }}
-              className="h-full flex flex-col bg-[#05070B] overflow-hidden border-r border-white/10"
+              className="h-full flex flex-col bg-[#05070B] overflow-hidden border-r border-white/10 w-full md:w-auto"
             >
               <div className="flex items-center justify-between text-[11px] text-zinc-400 font-sans border-b border-white/10 px-3 py-1.5 bg-[#080A0F] shrink-0">
                 <div className="flex items-center gap-2">
-                  {!showFileTree && (
-                    <button
-                      onClick={() => setShowFileTree(true)}
-                      className="px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-white text-[10px] flex items-center gap-1 font-mono"
-                    >
-                      <PanelLeftOpen className="w-3 h-3" /> Show Files
-                    </button>
-                  )}
                   <span>Live Code Editor ({activeFile})</span>
                 </div>
                 <button
@@ -338,19 +338,19 @@ export function CodeWorkbench({ projectName }: { projectName: string }) {
                 value={codeContent}
                 onChange={(e) => handleCodeChange(e.target.value)}
                 placeholder="Paste or write your HTML/CSS/JS code here..."
-                className="w-full flex-1 p-4 bg-transparent text-zinc-100 focus:outline-none resize-none font-mono text-xs leading-relaxed"
+                className="w-full flex-1 p-3 sm:p-4 bg-transparent text-zinc-100 focus:outline-none resize-none font-mono text-xs leading-relaxed"
               />
             </div>
           )}
 
-          {/* DRAGGABLE RESIZABLE SPLIT HANDLE (Only in Split View mode) */}
+          {/* DRAGGABLE RESIZABLE SPLIT HANDLE */}
           {activeTab === "split" && (
             <div
               onMouseDown={(e) => {
                 e.preventDefault();
                 setIsResizingSplit(true);
               }}
-              className="w-3 h-full flex items-center justify-center hover:bg-white/30 cursor-col-resize group transition-colors shrink-0 z-30 select-none bg-[#080A0F]"
+              className="hidden md:flex w-3 h-full items-center justify-center hover:bg-white/30 cursor-col-resize group transition-colors shrink-0 z-30 select-none bg-[#080A0F]"
               title="Drag left/right to resize Editor & Live Preview panels"
             >
               <div className="w-1 h-12 bg-white/40 group-hover:bg-white rounded-full transition-colors" />
@@ -363,76 +363,72 @@ export function CodeWorkbench({ projectName }: { projectName: string }) {
               style={{
                 width: activeTab === "split" ? `${100 - splitEditorWidthPercent}%` : "100%",
               }}
-              className="h-full flex flex-col bg-[#080A0F] overflow-hidden"
+              className="h-full flex flex-col bg-[#05070B] overflow-hidden w-full md:w-auto"
             >
-              {/* Sleek Top Mini Browser Address Bar */}
-              <div className="h-9 border-b border-white/10 bg-[#05070B] px-3 flex items-center justify-between text-xs text-zinc-400 shrink-0">
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
-                    <span className="w-2.5 h-2.5 rounded-full bg-amber-500/80" />
-                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80" />
+              {/* Responsive Device Viewport Controls Header */}
+              <div className="flex items-center justify-between text-[11px] text-zinc-400 border-b border-white/10 px-3 py-1.5 bg-[#080A0F] shrink-0 flex-wrap gap-1">
+                <div className="flex items-center gap-1.5">
+                  <div className="flex gap-1.5 items-center">
+                    <span className="w-2.5 h-2.5 rounded-full bg-red-500/80 inline-block" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-amber-500/80 inline-block" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80 inline-block" />
                   </div>
                   <button
-                    onClick={() => setPreviewKey((prev) => prev + 1)}
-                    className="p-1 hover:bg-white/10 rounded text-zinc-400 hover:text-white transition-colors flex items-center gap-1 text-[11px]"
-                    title="Reload Preview"
+                    onClick={() => handleSyncPreview()}
+                    className="p-1 rounded hover:bg-white/10 text-zinc-400 hover:text-white transition-colors"
+                    title="Reload Preview Frame"
                   >
-                    <RotateCw className="w-3 h-3" /> Refresh
+                    <RefreshCw className="w-3 h-3" />
                   </button>
+                  <span className="font-mono text-[10px] text-zinc-500 hidden sm:inline">Live Sandbox</span>
                 </div>
 
-                {/* Viewport Switcher */}
-                <div className="flex items-center bg-[#0D1117] p-0.5 rounded-md border border-white/10 text-[10px]">
+                <div className="flex items-center gap-1">
                   <button
                     onClick={() => setViewport("desktop")}
-                    className={`p-1 rounded ${viewport === "desktop" ? "bg-white text-black font-bold" : "text-zinc-400 hover:text-white"}`}
-                    title="Desktop View"
+                    className={`p-1 rounded transition-colors ${
+                      viewport === "desktop" ? "bg-white/20 text-white" : "text-zinc-500 hover:text-zinc-300"
+                    }`}
+                    title="Desktop View (100%)"
                   >
-                    <Monitor className="w-3 h-3" />
+                    <Monitor className="w-3.5 h-3.5" />
                   </button>
                   <button
                     onClick={() => setViewport("tablet")}
-                    className={`p-1 rounded ${viewport === "tablet" ? "bg-white text-black font-bold" : "text-zinc-400 hover:text-white"}`}
-                    title="Tablet View"
+                    className={`p-1 rounded transition-colors ${
+                      viewport === "tablet" ? "bg-white/20 text-white" : "text-zinc-500 hover:text-zinc-300"
+                    }`}
+                    title="Tablet View (768px)"
                   >
-                    <Tablet className="w-3 h-3" />
+                    <Tablet className="w-3.5 h-3.5" />
                   </button>
                   <button
                     onClick={() => setViewport("mobile")}
-                    className={`p-1 rounded ${viewport === "mobile" ? "bg-white text-black font-bold" : "text-zinc-400 hover:text-white"}`}
-                    title="Mobile View"
+                    className={`p-1 rounded transition-colors ${
+                      viewport === "mobile" ? "bg-white/20 text-white" : "text-zinc-500 hover:text-zinc-300"
+                    }`}
+                    title="Mobile View (375px)"
                   >
-                    <Smartphone className="w-3 h-3" />
+                    <Smartphone className="w-3.5 h-3.5" />
                   </button>
                 </div>
-
-                <a
-                  href="/preview-frame"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="p-1 hover:bg-white/10 rounded text-zinc-400 hover:text-white transition-colors flex items-center gap-1 text-[11px]"
-                  title="Open in new browser tab"
-                >
-                  <ExternalLink className="w-3 h-3" /> Full
-                </a>
               </div>
 
-              {/* Embedded Interactive Scrollable Frame Container */}
-              <div className="flex-1 w-full h-full bg-[#05070B] overflow-auto flex items-center justify-center p-2">
+              {/* Dynamic Sandbox Frame */}
+              <div className="flex-1 bg-white/5 flex items-center justify-center p-0 overflow-auto">
                 <div
                   className={`h-full transition-all duration-300 ${
-                    viewport === "desktop"
-                      ? "w-full"
+                    viewport === "mobile"
+                      ? "w-[375px] max-w-full border-x border-white/20 shadow-2xl my-auto"
                       : viewport === "tablet"
-                      ? "w-[768px] border border-white/10 rounded-xl shadow-2xl overflow-hidden"
-                      : "w-[375px] border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
+                      ? "w-[768px] max-w-full border-x border-white/20 shadow-2xl my-auto"
+                      : "w-full"
                   }`}
                 >
                   <iframe
                     key={previewKey}
-                    src="/preview-frame"
-                    title="Aether Live Dynamic Code Preview"
+                    srcDoc={codeContent}
+                    title="Aether Live Sandbox Frame"
                     className="w-full h-full border-0 bg-white"
                     sandbox="allow-scripts allow-forms allow-same-origin allow-modals allow-popups"
                   />

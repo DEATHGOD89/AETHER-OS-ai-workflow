@@ -889,7 +889,7 @@ export function AIChatStudio({
 
       {/* Input Bar with Temporary Override Row */}
       <div className="p-3 border-t border-white/10 bg-[#080A0F] shrink-0 space-y-2">
-        <div className="flex items-center justify-between px-1 text-[11px] text-zinc-400">
+        <div className="flex flex-wrap items-center justify-between gap-1.5 px-1 text-[11px] text-zinc-400">
           <label className="flex items-center gap-1.5 cursor-pointer hover:text-zinc-200">
             <input
               type="checkbox"
@@ -898,16 +898,16 @@ export function AIChatStudio({
               className="rounded bg-[#05070B] border-white/20 text-white focus:ring-0"
             />
             <Cpu className="w-3.5 h-3.5 text-white" strokeWidth={1.75} />
-            Project Vector Memory (RAG Active)
+            <span>Vector Memory (RAG)</span>
           </label>
 
-          <div className="flex items-center gap-2 font-mono text-[10px]">
+          <div className="flex items-center gap-2 font-mono text-[10px] w-full sm:w-auto">
             <input
               type="text"
-              placeholder="Temp override (e.g. Use Vue for this request)"
+              placeholder="Temp override (e.g. Use Vue)"
               value={tempOverride}
               onChange={(e) => setTempOverride(e.target.value)}
-              className="bg-[#05070B] border border-white/10 rounded px-2 py-0.5 text-white placeholder-zinc-500 w-52 focus:outline-none focus:border-amber-500/50 text-[10px]"
+              className="bg-[#05070B] border border-white/10 rounded px-2 py-0.5 text-white placeholder-zinc-500 w-full sm:w-52 focus:outline-none focus:border-amber-500/50 text-[10px]"
             />
           </div>
         </div>
