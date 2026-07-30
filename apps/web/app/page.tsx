@@ -335,10 +335,6 @@ export default function FullyCollapsibleAetherOS() {
     .badge { display: inline-block; background: rgba(16,185,129,0.15); color: #10B981; border: 1px solid rgba(16,185,129,0.3); padding: 0.3rem 0.8rem; border-radius: 99px; font-size: 0.75rem; font-weight: 600; margin-bottom: 1rem; }
     h1 { font-size: 3rem; font-weight: 900; line-height: 1.1; margin: 0.5rem 0 1rem; color: #fff; }
     p { color: #a1a1aa; font-size: 1.1rem; line-height: 1.6; margin-bottom: 2rem; }
-    .cta-group { display: flex; gap: 1rem; justify-content: center; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; padding: 2rem 4rem; max-width: 1100px; margin: 0 auto; }
-    .card { background: #0D1117; border: 1px solid rgba(255,255,255,0.1); padding: 1.5rem; border-radius: 12px; }
-    .card h3 { margin-top: 0; color: #fff; }
   </style>
 </head>
 <body>
@@ -721,10 +717,10 @@ export default function FullyCollapsibleAetherOS() {
             </div>
           )}
 
-          {/* Right Inspector Drawer Overlay for Screens < 1280px */}
+          {/* Right Inspector Drawer Overlay for Screens < 1280px (Stacked Top to Bottom) */}
           {isInspectorOpen && (
-            <div className="xl:hidden fixed inset-y-0 right-0 z-40 w-80 max-w-[85vw] bg-[#080A0F] border-l border-white/10 p-4 space-y-4 shadow-2xl overflow-y-auto animate-in slide-in-from-right duration-200">
-              <div className="flex items-center justify-between border-b border-white/10 pb-3">
+            <div className="xl:hidden fixed inset-y-0 right-0 z-40 w-80 sm:w-96 max-w-[90vw] bg-[#080A0F] border-l border-white/10 p-4 flex flex-col space-y-4 shadow-2xl overflow-y-auto animate-in slide-in-from-right duration-200">
+              <div className="flex items-center justify-between border-b border-white/10 pb-3 shrink-0">
                 <span className="font-bold text-xs text-white uppercase tracking-wider flex items-center gap-2">
                   <Activity className="w-4 h-4 text-emerald-400" /> Project Inspector
                 </span>
@@ -733,13 +729,13 @@ export default function FullyCollapsibleAetherOS() {
                 </button>
               </div>
 
-              {/* Guided Checklist Panel */}
-              <div className="p-3.5 rounded-lg border border-emerald-500/30 bg-[#0D1117] space-y-2.5 font-mono text-xs">
-                <div className="flex items-center gap-1.5 text-white font-bold">
+              {/* Top Panel: Guided Checklist (Above) */}
+              <div className="p-4 rounded-xl border border-emerald-500/30 bg-[#0D1117] space-y-2.5 font-mono text-xs w-full">
+                <div className="flex items-center gap-1.5 text-white font-bold border-b border-white/10 pb-2">
                   <ListTodo className="w-4 h-4 text-emerald-400" />
                   <span>Starter Kit Next Actions</span>
                 </div>
-                <div className="space-y-1 text-[11px] text-zinc-300">
+                <div className="space-y-1.5 text-[11px] text-zinc-300 pt-1">
                   <div className="flex items-center gap-1.5 text-emerald-400">✓ Customize Hero & Branding</div>
                   <div className="flex items-center gap-1.5 text-emerald-400">✓ Configure Primary Goal ({primaryGoal})</div>
                   <div className="flex items-center gap-1.5 text-zinc-400">• Inspect Injected AI Context</div>
@@ -748,21 +744,19 @@ export default function FullyCollapsibleAetherOS() {
                 </div>
               </div>
 
-              {/* Health Scorecard Breakdown */}
-              <div className="p-3.5 rounded-lg border border-white/10 bg-[#0D1117] space-y-3 font-mono">
+              {/* Bottom Panel: Health Scorecard (Below) */}
+              <div className="p-4 rounded-xl border border-white/10 bg-[#0D1117] space-y-3 font-mono w-full">
                 <div className="flex items-center justify-between border-b border-white/10 pb-2">
                   <div className="flex items-center gap-1.5 text-xs text-white font-medium">
                     <Activity className="w-4 h-4 text-emerald-400" />
                     <span>Health Scorecard</span>
                   </div>
-                  <div className="text-right">
-                    <div className="text-xs font-bold text-emerald-400">{projectHealth.total} / 100</div>
-                  </div>
+                  <div className="text-right font-bold text-emerald-400 text-xs">{projectHealth.total} / 100</div>
                 </div>
 
-                <div className="space-y-1 text-[11px]">
+                <div className="space-y-1.5 text-[11px]">
                   {projectHealth.breakdown.map((item, idx) => (
-                    <div key={idx} className="flex items-center justify-between text-zinc-300 py-0.5">
+                    <div key={idx} className="flex items-center justify-between text-zinc-300 py-1 border-b border-white/5">
                       <span className="truncate">✓ {item.category}</span>
                       <span className="font-semibold text-emerald-400">{item.score} / {item.max}</span>
                     </div>
@@ -842,18 +836,34 @@ export default function FullyCollapsibleAetherOS() {
                   <CodeWorkbench projectName={currentProject.name} />
                 </div>
               ) : activeTab === "inspector" ? (
-                <div className="w-full h-full overflow-y-auto p-3 space-y-3 font-mono text-xs">
-                  <div className="p-4 rounded-lg border border-white/10 bg-[#0D1117] space-y-3">
+                <div className="w-full h-full overflow-y-auto p-4 space-y-4 font-mono text-xs max-w-xl mx-auto">
+                  {/* Top Panel: Guided Checklist (Above) */}
+                  <div className="p-4 rounded-xl border border-emerald-500/30 bg-[#0D1117] space-y-3 shadow-lg w-full">
+                    <div className="flex items-center gap-2 text-white font-bold text-sm border-b border-white/10 pb-2">
+                      <ListTodo className="w-4 h-4 text-emerald-400" />
+                      <span>Starter Kit Next Actions</span>
+                    </div>
+                    <div className="space-y-2 text-xs text-zinc-300 pt-1">
+                      <div className="flex items-center gap-2 text-emerald-400">✓ Customize Hero & Branding</div>
+                      <div className="flex items-center gap-2 text-emerald-400">✓ Configure Primary Goal ({primaryGoal})</div>
+                      <div className="flex items-center gap-2 text-zinc-400">• Inspect Injected AI Context</div>
+                      <div className="flex items-center gap-2 text-zinc-400">• Run AI Pre-Flight Audit</div>
+                      <div className="flex items-center gap-2 text-zinc-400">• Launch Live Production URL</div>
+                    </div>
+                  </div>
+
+                  {/* Bottom Panel: Health Scorecard Breakdown (Below) */}
+                  <div className="p-4 rounded-xl border border-white/10 bg-[#0D1117] space-y-3 shadow-lg w-full">
                     <div className="flex items-center justify-between border-b border-white/10 pb-2">
                       <div className="flex items-center gap-2 text-sm text-white font-bold">
-                        <Activity className="w-5 h-5 text-emerald-400" />
+                        <Activity className="w-4 h-4 text-emerald-400" />
                         <span>Health Scorecard Breakdown</span>
                       </div>
-                      <div className="text-right font-bold text-emerald-400 text-base">{projectHealth.total}/100</div>
+                      <div className="text-right font-bold text-emerald-400 text-sm">{projectHealth.total}/100</div>
                     </div>
                     {projectHealth.breakdown.map((item, idx) => (
-                      <div key={idx} className="flex items-center justify-between text-zinc-300 py-1 border-b border-white/5">
-                        <span>{item.category}</span>
+                      <div key={idx} className="flex items-center justify-between text-zinc-300 py-1.5 border-b border-white/5">
+                        <span>✓ {item.category}</span>
                         <span className="font-bold text-emerald-400">{item.score}/{item.max}</span>
                       </div>
                     ))}
@@ -877,16 +887,16 @@ export default function FullyCollapsibleAetherOS() {
               )}
             </main>
 
-            {/* Desktop Right Inspector (Only relative on XL screens 1280px+) */}
+            {/* Desktop Right Inspector (Only relative on XL screens 1280px+, Stacked Top to Bottom) */}
             {isInspectorOpen && (
-              <aside className="hidden xl:flex w-64 border-l border-white/5 bg-[#080A0F]/80 backdrop-blur-md p-3.5 space-y-4 shrink-0 overflow-y-auto transition-all duration-200">
-                {/* Onboarding Next Steps Guided Checklist Panel */}
-                <div className="p-3.5 rounded-lg border border-emerald-500/30 bg-[#0D1117] space-y-2.5 font-mono text-xs">
-                  <div className="flex items-center gap-1.5 text-white font-bold">
+              <aside className="hidden xl:flex w-64 border-l border-white/5 bg-[#080A0F]/80 backdrop-blur-md p-3.5 flex-col space-y-4 shrink-0 overflow-y-auto transition-all duration-200">
+                {/* Top Panel: Guided Checklist (Above) */}
+                <div className="p-3.5 rounded-lg border border-emerald-500/30 bg-[#0D1117] space-y-2.5 font-mono text-xs w-full">
+                  <div className="flex items-center gap-1.5 text-white font-bold border-b border-white/10 pb-2">
                     <ListTodo className="w-4 h-4 text-emerald-400" />
                     <span>Starter Kit Next Actions</span>
                   </div>
-                  <div className="space-y-1 text-[11px] text-zinc-300">
+                  <div className="space-y-1 text-[11px] text-zinc-300 pt-1">
                     <div className="flex items-center gap-1.5 text-emerald-400">✓ Customize Hero & Branding</div>
                     <div className="flex items-center gap-1.5 text-emerald-400">✓ Configure Primary Goal ({primaryGoal})</div>
                     <div className="flex items-center gap-1.5 text-zinc-400">• Inspect Injected AI Context</div>
@@ -895,21 +905,19 @@ export default function FullyCollapsibleAetherOS() {
                   </div>
                 </div>
 
-                {/* Explainable Health Scorecard Breakdown */}
-                <div className="p-3.5 rounded-lg border border-white/10 bg-[#0D1117] space-y-3 font-mono">
+                {/* Bottom Panel: Health Scorecard (Below) */}
+                <div className="p-3.5 rounded-lg border border-white/10 bg-[#0D1117] space-y-3 font-mono w-full">
                   <div className="flex items-center justify-between border-b border-white/10 pb-2">
                     <div className="flex items-center gap-1.5 text-xs text-white font-medium">
                       <Activity className="w-4 h-4 text-emerald-400" />
                       <span>Health Scorecard</span>
                     </div>
-                    <div className="text-right">
-                      <div className="text-xs font-bold text-emerald-400">{projectHealth.total} / 100</div>
-                    </div>
+                    <div className="text-right font-bold text-emerald-400 text-xs">{projectHealth.total} / 100</div>
                   </div>
 
                   <div className="space-y-1 text-[11px]">
                     {projectHealth.breakdown.map((item, idx) => (
-                      <div key={idx} className="flex items-center justify-between text-zinc-300">
+                      <div key={idx} className="flex items-center justify-between text-zinc-300 py-1 border-b border-white/5">
                         <span className="truncate">✓ {item.category}</span>
                         <span className="font-semibold text-emerald-400">{item.score} / {item.max}</span>
                       </div>
