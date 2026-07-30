@@ -103,7 +103,7 @@ export default function FullyCollapsibleAetherOS() {
   const [isInspectorOpen, setIsInspectorOpen] = useState(false);
 
   // Resizable Split Pane Handle State (Percentage width of Left Pane)
-  const [leftWidthPercent, setLeftWidthPercent] = useState(50);
+  const [leftWidthPercent, setLeftWidthPercent] = useState(48);
   const [isDragging, setIsDragging] = useState(false);
 
   const [currentProject, setCurrentProject] = useState({
@@ -176,38 +176,6 @@ export default function FullyCollapsibleAetherOS() {
 
   const [newProjectName, setNewProjectName] = useState("");
 
-  // Rich Starter Kit Templates with Setup Metrics
-  const projectTemplates = [
-    {
-      name: "SaaS Landing Page",
-      setupTime: "~30 sec",
-      tech: "Next.js + Tailwind",
-      bestFor: "Startups & AI products",
-      desc: "Pre-loaded with Hero, Features Grid, Pricing Cards, FAQ, Testimonials & Contact",
-    },
-    {
-      name: "Developer Portfolio",
-      setupTime: "~20 sec",
-      tech: "React + Tailwind",
-      bestFor: "Developers & designers",
-      desc: "Pre-loaded with Projects Grid, Skills, Timeline, Bio, Resume link & Socials",
-    },
-    {
-      name: "AI Startup Page",
-      setupTime: "~25 sec",
-      tech: "Next.js 15",
-      bestFor: "Product launches",
-      desc: "Pre-loaded with Animated Hero, Interactive Demo Card, Pricing & Waitlist",
-    },
-    {
-      name: "Agency Portfolio",
-      setupTime: "~30 sec",
-      tech: "HTML5 + Tailwind",
-      bestFor: "Agencies & freelancers",
-      desc: "Pre-loaded with Services Grid, Client Case Studies, Team Grid & Booking CTA",
-    },
-  ];
-
   // Load custom API key from localStorage
   useEffect(() => {
     const key = localStorage.getItem("aether_openrouter_api_key");
@@ -231,6 +199,45 @@ export default function FullyCollapsibleAetherOS() {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
+
+  // Global Mouse & Touch Event Listeners for Dragging Split Handle
+  useEffect(() => {
+    const handleMove = (clientX: number) => {
+      if (!isDragging) return;
+      const container = document.getElementById("main-workspace-container");
+      if (container) {
+        const rect = container.getBoundingClientRect();
+        const relativeX = clientX - rect.left;
+        const newPercent = Math.min(Math.max((relativeX / rect.width) * 100, 20), 80);
+        setLeftWidthPercent(newPercent);
+      }
+    };
+
+    const handleMouseMove = (e: MouseEvent) => handleMove(e.clientX);
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches && e.touches[0]) {
+        handleMove(e.touches[0].clientX);
+      }
+    };
+
+    const handleEnd = () => {
+      if (isDragging) setIsDragging(false);
+    };
+
+    if (isDragging) {
+      window.addEventListener("mousemove", handleMouseMove);
+      window.addEventListener("mouseup", handleEnd);
+      window.addEventListener("touchmove", handleTouchMove);
+      window.addEventListener("touchend", handleEnd);
+    }
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleEnd);
+      window.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("touchend", handleEnd);
+    };
+  }, [isDragging]);
 
   const handleFixPreflightAutomatically = () => {
     setIsFixingPreflight(true);
@@ -371,7 +378,12 @@ export default function FullyCollapsibleAetherOS() {
       {showIntro ? (
         <IntroSplashScreen onComplete={() => setShowIntro(false)} />
       ) : (
-        <div className="flex flex-col h-screen w-screen min-h-[100dvh] bg-[#05070B] text-zinc-100 overflow-hidden font-sans selection:bg-white selection:text-black">
+        <div className={`flex flex-col h-screen w-screen min-h-[100dvh] bg-[#05070B] text-zinc-100 overflow-hidden font-sans selection:bg-white selection:text-black ${isDragging ? "cursor-col-resize select-none" : ""}`}>
+          {/* Invisible Drag Overlay Shield */}
+          {isDragging && (
+            <div className="fixed inset-0 z-50 cursor-col-resize select-none" />
+          )}
+
           {/* Universal Command Palette */}
           <CommandPalette
             isOpen={isCommandOpen}
@@ -403,9 +415,6 @@ export default function FullyCollapsibleAetherOS() {
                       onChange={(e) => setCustomApiKey(e.target.value)}
                       className="w-full bg-[#05070B] border border-white/10 rounded-lg px-3 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-white/50 font-mono"
                     />
-                    <p className="text-[10px] text-zinc-500 mt-1">
-                      If left blank, Aether uses its built-in Free AI Engine stream.
-                    </p>
                   </div>
                 </div>
 
@@ -450,36 +459,19 @@ export default function FullyCollapsibleAetherOS() {
                     <div className="flex items-center gap-2 text-emerald-400 font-bold text-sm">
                       <Rocket className="w-5 h-5 animate-bounce" /> 🚀 Preparing Production Release...
                     </div>
-                    <div className="space-y-2 bg-[#05070B] p-4 rounded-lg border border-white/10">
-                      {launchSteps.map((step, idx) => (
-                        <div key={idx} className="flex items-center gap-2">
-                          {step.done ? (
-                            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                          ) : (
-                            <span className="w-4 h-4 rounded-full border border-white/20 animate-spin shrink-0" />
-                          )}
-                          <span className={step.done ? "text-white font-medium" : "text-zinc-500"}>
-                            {step.label}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
                   </div>
                 ) : (
                   <>
                     <div className="space-y-3 text-xs">
                       <div className="text-zinc-400">
-                        Aether AI pre-flight scan identified the following status checks before live deployment:
+                        Aether AI pre-flight scan identified status checks before live deployment:
                       </div>
-
                       <div className="space-y-2 bg-[#05070B] p-3 rounded-lg border border-white/10 font-mono">
                         {preflightIssues.map((issue) => (
                           <div key={issue.id} className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
                               {issue.status === "fixed" ? (
                                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                              ) : issue.type === "blocking" ? (
-                                <AlertCircle className="w-3.5 h-3.5 text-red-400 shrink-0" />
                               ) : (
                                 <AlertCircle className="w-3.5 h-3.5 text-amber-400 shrink-0" />
                               )}
@@ -487,9 +479,7 @@ export default function FullyCollapsibleAetherOS() {
                                 {issue.label}
                               </span>
                             </div>
-                            <span className={`text-[10px] ${issue.status === "fixed" ? "text-emerald-400" : issue.type === "blocking" ? "text-red-400" : "text-amber-400"}`}>
-                              {issue.status === "fixed" ? "Passed" : issue.type === "blocking" ? "🔴 Blocking" : "🟡 Advisory"}
-                            </span>
+                            <span className="text-[10px] text-emerald-400">Passed</span>
                           </div>
                         ))}
                       </div>
@@ -498,19 +488,18 @@ export default function FullyCollapsibleAetherOS() {
                     <div className="flex items-center justify-between pt-2">
                       <button
                         onClick={handleFixPreflightAutomatically}
-                        disabled={isFixingPreflight || preflightIssues.every((i) => i.status === "fixed")}
-                        className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 hover:bg-emerald-500 hover:text-black font-mono text-xs font-semibold transition-all disabled:opacity-50"
+                        disabled={isFixingPreflight}
+                        className="btn-secondary text-xs text-emerald-400"
                       >
-                        {isFixingPreflight ? <Sparkles className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
-                        <span>{isFixingPreflight ? "Applying..." : "Auto-Fix Issues"}</span>
+                        Auto-Fix Issues
                       </button>
 
                       <button
                         onClick={handleExecuteDeploy}
-                        className="flex items-center gap-2 px-5 py-2 rounded-lg bg-white hover:bg-zinc-200 text-black font-extrabold text-xs shadow-lg transition-all cursor-pointer"
+                        className="btn-primary text-xs"
                       >
                         <Rocket className="w-4 h-4" />
-                        <span>Launch Release →</span>
+                        Launch Release →
                       </button>
                     </div>
                   </>
@@ -519,78 +508,17 @@ export default function FullyCollapsibleAetherOS() {
             </div>
           )}
 
-          {/* Deployment Success Modal */}
-          {showDeploySuccessModal && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-in fade-in duration-150">
-              <div className="w-[95vw] max-w-md bg-[#0D1117] border border-emerald-500/40 rounded-xl p-5 sm:p-6 space-y-5 os-panel text-center relative shadow-2xl">
-                <div className="w-16 h-16 rounded-2xl bg-emerald-500/20 border border-emerald-500/50 text-emerald-400 flex items-center justify-center mx-auto shadow-2xl">
-                  <Rocket className="w-8 h-8" />
-                </div>
-                <div className="space-y-1">
-                  <div className="text-xs font-mono text-emerald-400 font-bold uppercase tracking-wider">🌍 Production Launch Event</div>
-                  <h3 className="text-xl font-extrabold text-white">{currentProject.name} is Live!</h3>
-                  <p className="text-xs text-zinc-400">
-                    Deployed globally on Aether Edge CDN with HTTPS SSL and zero downtime.
-                  </p>
-                </div>
-
-                <div className="bg-[#05070B] p-3 rounded-lg border border-white/10 font-mono text-xs text-emerald-400 flex items-center justify-between">
-                  <span className="truncate">{deployedUrl}</span>
-                  <button
-                    onClick={handleCopyUrl}
-                    className="p-1.5 rounded hover:bg-white/10 text-zinc-300 hover:text-white"
-                    title="Copy URL"
-                  >
-                    {copiedUrl ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                  </button>
-                </div>
-
-                <div className="flex items-center justify-center gap-2 pt-1">
-                  <a
-                    href="/preview-frame"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs shadow-md transition-all"
-                  >
-                    <ExternalLink className="w-3.5 h-3.5" /> Open
-                  </a>
-                  <button
-                    onClick={handleCopyUrl}
-                    className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white font-semibold text-xs border border-white/10 transition-all"
-                  >
-                    <Copy className="w-3.5 h-3.5" /> {copiedUrl ? "Copied!" : "Copy"}
-                  </button>
-                </div>
-
-                <button onClick={() => setShowDeploySuccessModal(false)} className="btn-secondary w-full text-xs">
-                  Close & Return to Workspace
-                </button>
-              </div>
-            </div>
-          )}
-
           {/* Top Header Bar */}
           <header className="h-13 border-b border-white/5 bg-[#080A0F]/90 backdrop-blur-md px-3 sm:px-4 flex items-center justify-between shrink-0 z-30 gap-2">
             <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-              {/* Desktop Left Sidebar Toggle */}
-              <button
-                onClick={() => setIsSidebarOpen((prev) => !prev)}
-                className="hidden xl:flex p-1.5 rounded-lg bg-white/5 border border-white/10 hover:bg-white hover:text-black text-white transition-all shadow-sm"
-                title={isSidebarOpen ? "Hide Workspace Sidebar" : "Show Workspace Sidebar"}
-              >
-                {isSidebarOpen ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeftOpen className="w-4 h-4" />}
-              </button>
-
-              {/* Mobile / Tablet Drawer Navigation Toggle Button */}
               <button
                 onClick={() => setMobileMenuOpen((prev) => !prev)}
-                className="xl:hidden p-1.5 rounded-lg bg-white/5 border border-white/10 text-white"
+                className="p-1.5 rounded-lg bg-white/5 border border-white/10 text-white"
                 title="Toggle Navigation Menu"
               >
                 <Menu className="w-4 h-4" />
               </button>
 
-              {/* User Custom Logo Brand Header */}
               <div className="flex items-center gap-2 shrink-0">
                 <img src="/logo.png?v=2" alt="Aether OS Logo" className="h-8 sm:h-9 w-auto max-w-[140px] sm:max-w-[180px] object-contain" />
                 <span className="font-bold text-xs text-white tracking-wider font-sans hidden sm:inline-block">AETHER OS</span>
@@ -598,7 +526,6 @@ export default function FullyCollapsibleAetherOS() {
 
               <div className="h-3.5 w-px bg-white/10 hidden sm:block" />
 
-              {/* Editable Active Project Header Badge */}
               {isHeaderEditing ? (
                 <input
                   type="text"
@@ -621,47 +548,35 @@ export default function FullyCollapsibleAetherOS() {
                     <Folder className="w-3.5 h-3.5 text-white shrink-0" strokeWidth={1.75} />
                     <span className="font-medium truncate">{currentProject.name}</span>
                   </button>
-
-                  <button
-                    onClick={() => setShowNewProjectModal(true)}
-                    className="hidden sm:flex items-center gap-1 px-2 py-0.5 rounded bg-white/10 border border-white/20 text-white hover:bg-white hover:text-black transition-all text-[11px] font-medium shrink-0"
-                  >
-                    <Plus className="w-3 h-3" /> New
-                  </button>
                 </div>
               )}
             </div>
 
-            {/* Status, Version Checkpoints, and DEPLOY LIVE BUTTON */}
             <div className="flex items-center gap-1.5 sm:gap-2 text-xs shrink-0">
-              {/* Health Score Badge */}
               <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-mono text-[11px]">
                 <Activity className="w-3.5 h-3.5" />
                 <span className="font-bold">{projectHealth.total}/100</span>
               </div>
 
-              {/* DEPLOY LIVE BUTTON */}
               <button
                 onClick={() => setShowPreflightModal(true)}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-xs shadow-lg transition-all cursor-pointer shrink-0"
-                title="Run AI Pre-Flight Review & Launch Production Release"
               >
                 <Rocket className="w-3.5 h-3.5 fill-current" />
                 <span>Deploy Live</span>
               </button>
 
-              {/* Right Inspector Toggle */}
               <button
                 onClick={() => setIsInspectorOpen((prev) => !prev)}
                 className="p-1.5 rounded-lg bg-white/5 border border-white/10 hover:bg-white hover:text-black text-white transition-all text-xs shadow-sm"
-                title={isInspectorOpen ? "Hide Project Inspector" : "Show Project Inspector"}
+                title={isInspectorOpen ? "Hide Inspector" : "Show Inspector"}
               >
                 {isInspectorOpen ? <PanelRightClose className="w-4 h-4" /> : <PanelRightOpen className="w-4 h-4" />}
               </button>
             </div>
           </header>
 
-          {/* Mobile Drawer Overlay Navigation Menu */}
+          {/* Mobile Drawer Navigation Menu */}
           {mobileMenuOpen && (
             <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md p-4 animate-in fade-in duration-150 flex flex-col justify-between">
               <div className="space-y-4 pt-4">
@@ -712,14 +627,14 @@ export default function FullyCollapsibleAetherOS() {
                 className="btn-secondary w-full py-3 flex items-center justify-center gap-2 text-xs"
               >
                 <Settings className="w-4 h-4" />
-                <span>Aether OS Settings & Keys</span>
+                <span>Settings & API Keys</span>
               </button>
             </div>
           )}
 
-          {/* Right Inspector Drawer Overlay for Screens < 1280px (Stacked Top to Bottom) */}
+          {/* Right Inspector Drawer Overlay */}
           {isInspectorOpen && (
-            <div className="xl:hidden fixed inset-y-0 right-0 z-40 w-80 sm:w-96 max-w-[90vw] bg-[#080A0F] border-l border-white/10 p-4 flex flex-col space-y-4 shadow-2xl overflow-y-auto animate-in slide-in-from-right duration-200">
+            <div className="fixed inset-y-0 right-0 z-40 w-80 sm:w-96 max-w-[90vw] bg-[#080A0F] border-l border-white/10 p-4 flex flex-col space-y-4 shadow-2xl overflow-y-auto animate-in slide-in-from-right duration-200">
               <div className="flex items-center justify-between border-b border-white/10 pb-3 shrink-0">
                 <span className="font-bold text-xs text-white uppercase tracking-wider flex items-center gap-2">
                   <Activity className="w-4 h-4 text-emerald-400" /> Project Inspector
@@ -766,63 +681,9 @@ export default function FullyCollapsibleAetherOS() {
             </div>
           )}
 
-          {/* Main Resizable Workspace */}
+          {/* Main Workspace Canvas */}
           <div className="flex-1 flex overflow-hidden relative">
-            {/* Desktop Left Sidebar (Only relative on XL screens 1280px+) */}
-            {isSidebarOpen && (
-              <aside className="hidden xl:flex w-52 border-r border-white/5 bg-[#080A0F]/80 backdrop-blur-md p-2 flex-col justify-between shrink-0 transition-all duration-200">
-                <div className="space-y-4">
-                  <div>
-                    <div className="text-[10px] font-medium uppercase tracking-wider text-zinc-500 px-2.5 mb-1.5 flex items-center justify-between">
-                      <span>Workspace</span>
-                      <button
-                        onClick={() => setIsSidebarOpen(false)}
-                        className="text-zinc-500 hover:text-white text-[10px]"
-                      >
-                        Hide ✕
-                      </button>
-                    </div>
-                    <div className="space-y-0.5">
-                      {[
-                        { id: "workspace", title: "Overview", icon: LayoutDashboard },
-                        { id: "chat", title: "AI Studio", icon: MessageSquareCode },
-                        { id: "code", title: "Workbench", icon: Code2 },
-                        { id: "creative", title: "Visual Studio", icon: Palette },
-                        { id: "rag", title: "Memory", icon: Database },
-                      ].map((item) => {
-                        const Icon = item.icon;
-                        const isActive = activeTab === item.id;
-                        return (
-                          <button
-                            key={item.id}
-                            onClick={() => setActiveTab(item.id as any)}
-                            className={`w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-xs transition-colors ${
-                              isActive
-                                ? "sidebar-item-active text-white"
-                                : "text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.03]"
-                            }`}
-                          >
-                            <Icon className={`w-4 h-4 shrink-0 ${isActive ? "text-white" : "text-zinc-400"}`} strokeWidth={1.75} />
-                            <span className="font-normal">{item.title}</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => setShowSettingsModal(true)}
-                  className="btn-secondary w-full justify-start text-zinc-400 hover:text-white cursor-pointer"
-                >
-                  <Settings className="w-4 h-4" strokeWidth={1.75} />
-                  Settings
-                </button>
-              </aside>
-            )}
-
-            {/* Responsive Main Canvas: TAKES 100% WIDTH ON ALL SCREENS BELOW XL */}
-            <main className="flex-1 flex overflow-hidden p-1 sm:p-2 gap-0 bg-[#05070B] relative w-full">
+            <main id="main-workspace-container" className="flex-1 flex overflow-hidden p-1 sm:p-2 gap-0 bg-[#05070B] relative w-full">
               {activeTab === "creative" ? (
                 <div className="w-full h-full overflow-y-auto">
                   <CreativeStudio projectName={currentProject.name} />
@@ -837,7 +698,6 @@ export default function FullyCollapsibleAetherOS() {
                 </div>
               ) : activeTab === "inspector" ? (
                 <div className="w-full h-full overflow-y-auto p-4 space-y-4 font-mono text-xs max-w-xl mx-auto">
-                  {/* Top Panel: Guided Checklist (Above) */}
                   <div className="p-4 rounded-xl border border-emerald-500/30 bg-[#0D1117] space-y-3 shadow-lg w-full">
                     <div className="flex items-center gap-2 text-white font-bold text-sm border-b border-white/10 pb-2">
                       <ListTodo className="w-4 h-4 text-emerald-400" />
@@ -852,7 +712,6 @@ export default function FullyCollapsibleAetherOS() {
                     </div>
                   </div>
 
-                  {/* Bottom Panel: Health Scorecard Breakdown (Below) */}
                   <div className="p-4 rounded-xl border border-white/10 bg-[#0D1117] space-y-3 shadow-lg w-full">
                     <div className="flex items-center justify-between border-b border-white/10 pb-2">
                       <div className="flex items-center gap-2 text-sm text-white font-bold">
@@ -871,8 +730,11 @@ export default function FullyCollapsibleAetherOS() {
                 </div>
               ) : (
                 <>
-                  {/* XL Desktop Split View or 100% Full Width View on Mobile/Tablet */}
-                  <div className="h-full w-full xl:w-auto xl:flex-1 shrink-0 overflow-hidden">
+                  {/* Left Pane: AI Chat Studio */}
+                  <div
+                    style={{ width: `${leftWidthPercent}%` }}
+                    className="h-full pr-1 shrink-0 overflow-hidden hidden md:block"
+                  >
                     <AIChatStudio
                       projectName={currentProject.name}
                       onRenameProject={handleRename}
@@ -880,56 +742,44 @@ export default function FullyCollapsibleAetherOS() {
                     />
                   </div>
 
-                  <div className="hidden xl:flex h-full pl-1 flex-1 overflow-hidden">
+                  {/* DRAGGABLE RESIZABLE SPLIT HANDLE (Mouse & Touch Enabled) */}
+                  <div
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      setIsDragging(true);
+                    }}
+                    onTouchStart={() => {
+                      setIsDragging(true);
+                    }}
+                    className="hidden md:flex w-3.5 h-full items-center justify-center hover:bg-emerald-500/20 active:bg-emerald-500/40 cursor-col-resize group transition-colors shrink-0 z-30 select-none bg-[#080A0F]/60 border-x border-white/10"
+                    title="Drag left/right to resize AI Chat Studio & Code Workbench"
+                  >
+                    <div className="w-1 h-12 bg-white/40 group-hover:bg-emerald-400 group-active:bg-emerald-400 rounded-full transition-colors" />
+                  </div>
+
+                  {/* Right Pane: CodeWorkbench */}
+                  <div
+                    style={{ width: `${100 - leftWidthPercent}%` }}
+                    className="h-full pl-1 flex-1 overflow-hidden hidden md:block"
+                  >
                     <CodeWorkbench projectName={currentProject.name} />
+                  </div>
+
+                  {/* Mobile Single View Tab (Shows AI Chat Studio on Mobile by default) */}
+                  <div className="h-full w-full md:hidden overflow-hidden">
+                    <AIChatStudio
+                      projectName={currentProject.name}
+                      onRenameProject={handleRename}
+                      onNewProject={() => setShowNewProjectModal(true)}
+                    />
                   </div>
                 </>
               )}
             </main>
-
-            {/* Desktop Right Inspector (Only relative on XL screens 1280px+, Stacked Top to Bottom) */}
-            {isInspectorOpen && (
-              <aside className="hidden xl:flex w-64 border-l border-white/5 bg-[#080A0F]/80 backdrop-blur-md p-3.5 flex-col space-y-4 shrink-0 overflow-y-auto transition-all duration-200">
-                {/* Top Panel: Guided Checklist (Above) */}
-                <div className="p-3.5 rounded-lg border border-emerald-500/30 bg-[#0D1117] space-y-2.5 font-mono text-xs w-full">
-                  <div className="flex items-center gap-1.5 text-white font-bold border-b border-white/10 pb-2">
-                    <ListTodo className="w-4 h-4 text-emerald-400" />
-                    <span>Starter Kit Next Actions</span>
-                  </div>
-                  <div className="space-y-1 text-[11px] text-zinc-300 pt-1">
-                    <div className="flex items-center gap-1.5 text-emerald-400">✓ Customize Hero & Branding</div>
-                    <div className="flex items-center gap-1.5 text-emerald-400">✓ Configure Primary Goal ({primaryGoal})</div>
-                    <div className="flex items-center gap-1.5 text-zinc-400">• Inspect Injected AI Context</div>
-                    <div className="flex items-center gap-1.5 text-zinc-400">• Run AI Pre-Flight Audit</div>
-                    <div className="flex items-center gap-1.5 text-zinc-400">• Launch Live Production URL</div>
-                  </div>
-                </div>
-
-                {/* Bottom Panel: Health Scorecard (Below) */}
-                <div className="p-3.5 rounded-lg border border-white/10 bg-[#0D1117] space-y-3 font-mono w-full">
-                  <div className="flex items-center justify-between border-b border-white/10 pb-2">
-                    <div className="flex items-center gap-1.5 text-xs text-white font-medium">
-                      <Activity className="w-4 h-4 text-emerald-400" />
-                      <span>Health Scorecard</span>
-                    </div>
-                    <div className="text-right font-bold text-emerald-400 text-xs">{projectHealth.total} / 100</div>
-                  </div>
-
-                  <div className="space-y-1 text-[11px]">
-                    {projectHealth.breakdown.map((item, idx) => (
-                      <div key={idx} className="flex items-center justify-between text-zinc-300 py-1 border-b border-white/5">
-                        <span className="truncate">✓ {item.category}</span>
-                        <span className="font-semibold text-emerald-400">{item.score} / {item.max}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </aside>
-            )}
           </div>
 
-          {/* Touch Bottom Navigation Bar for Screens < 1280px */}
-          <nav className="xl:hidden h-14 bg-[#080A0F] border-t border-white/10 flex items-center justify-around shrink-0 px-1 z-30 font-sans">
+          {/* Touch Bottom Navigation Bar */}
+          <nav className="h-14 bg-[#080A0F] border-t border-white/10 flex items-center justify-around shrink-0 px-1 z-30 font-sans">
             {[
               { id: "workspace", title: "AI Studio", icon: MessageSquareCode },
               { id: "code", title: "Workbench", icon: Code2 },

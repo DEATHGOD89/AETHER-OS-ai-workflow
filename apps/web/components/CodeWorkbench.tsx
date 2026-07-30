@@ -350,10 +350,13 @@ export function CodeWorkbench({ projectName }: { projectName?: string }) {
                 e.preventDefault();
                 setIsResizingSplit(true);
               }}
-              className="hidden md:flex w-3 h-full items-center justify-center hover:bg-white/30 cursor-col-resize group transition-colors shrink-0 z-30 select-none bg-[#080A0F]"
+              onTouchStart={() => {
+                setIsResizingSplit(true);
+              }}
+              className="flex w-3.5 h-full items-center justify-center hover:bg-emerald-500/20 active:bg-emerald-500/40 cursor-col-resize group transition-colors shrink-0 z-30 select-none bg-[#080A0F]/60 border-x border-white/10"
               title="Drag left/right to resize Editor & Live Preview panels"
             >
-              <div className="w-1 h-12 bg-white/40 group-hover:bg-white rounded-full transition-colors" />
+              <div className="w-1 h-12 bg-white/40 group-hover:bg-emerald-400 group-active:bg-emerald-400 rounded-full transition-colors" />
             </div>
           )}
 
