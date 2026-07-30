@@ -99,8 +99,8 @@ export default function FullyCollapsibleAetherOS() {
   ]);
 
   // Toggle Hide Workspace Sidebar & Inspector Panel States
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [isInspectorOpen, setIsInspectorOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isInspectorOpen, setIsInspectorOpen] = useState(false);
 
   // Resizable Split Pane Handle State (Percentage width of Left Pane)
   const [leftWidthPercent, setLeftWidthPercent] = useState(50);
@@ -232,35 +232,6 @@ export default function FullyCollapsibleAetherOS() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  // Global Mouse Event Listeners for Smooth Dragging
-  useEffect(() => {
-    const handleGlobalMouseMove = (e: MouseEvent) => {
-      if (!isDragging) return;
-      const leftOffset = isSidebarOpen ? 208 : 0;
-      const rightOffset = isInspectorOpen ? 256 : 0;
-      const containerWidth = window.innerWidth - leftOffset - rightOffset;
-      const relativeX = e.clientX - leftOffset;
-      const newPercent = Math.min(Math.max((relativeX / containerWidth) * 100, 15), 85);
-      setLeftWidthPercent(newPercent);
-    };
-
-    const handleGlobalMouseUp = () => {
-      if (isDragging) {
-        setIsDragging(false);
-      }
-    };
-
-    if (isDragging) {
-      window.addEventListener("mousemove", handleGlobalMouseMove);
-      window.addEventListener("mouseup", handleGlobalMouseUp);
-    }
-
-    return () => {
-      window.removeEventListener("mousemove", handleGlobalMouseMove);
-      window.removeEventListener("mouseup", handleGlobalMouseUp);
-    };
-  }, [isDragging, isSidebarOpen, isInspectorOpen]);
-
   const handleFixPreflightAutomatically = () => {
     setIsFixingPreflight(true);
     setTimeout(() => {
@@ -349,7 +320,6 @@ export default function FullyCollapsibleAetherOS() {
         nextAction: "Customize & Deploy Live",
       });
 
-      // Generate Rich Production Code String into Live Sandbox
       const templateCode = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -369,7 +339,6 @@ export default function FullyCollapsibleAetherOS() {
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; padding: 2rem 4rem; max-width: 1100px; margin: 0 auto; }
     .card { background: #0D1117; border: 1px solid rgba(255,255,255,0.1); padding: 1.5rem; border-radius: 12px; }
     .card h3 { margin-top: 0; color: #fff; }
-    .price { font-size: 2rem; font-weight: 800; color: #fff; margin: 1rem 0; }
   </style>
 </head>
 <body>
@@ -377,29 +346,10 @@ export default function FullyCollapsibleAetherOS() {
     <div class="brand">${productName}</div>
     <a href="#" class="nav-btn">${primaryGoal} →</a>
   </header>
-
   <div class="hero">
-    <div class="badge">🚀 Built for ${targetAudience} • Goal: ${primaryGoal}</div>
+    <div class="badge">Built for ${targetAudience} • Goal: ${primaryGoal}</div>
     <h1>The Ultimate ${selectedTemplate} Solution</h1>
     <p>Empower your business with real-time AI context, zero latency, and instant cloud edge deployment.</p>
-    <div class="cta-group">
-      <a href="#" class="nav-btn">${primaryGoal} Now</a>
-    </div>
-  </div>
-
-  <div class="grid">
-    <div class="card">
-      <h3>⚡ Instant Execution</h3>
-      <p>Zero-setup live rendering with automatic state sync and hot updates.</p>
-    </div>
-    <div class="card">
-      <h3>🛡️ 3-Layer Memory</h3>
-      <p>Persists brand guidelines, fonts, and stack preferences across all projects.</p>
-    </div>
-    <div class="card">
-      <h3>🚀 1-Click Deploy</h3>
-      <p>Pre-flight AI review and automated edge CDN publishing.</p>
-    </div>
   </div>
 </body>
 </html>`;
@@ -419,34 +369,13 @@ export default function FullyCollapsibleAetherOS() {
     }
   };
 
-  const lifecycleStages = [
-    { name: "Planning", status: "done" },
-    { name: "Building", status: "done" },
-    { name: "Preview", status: "done" },
-    { name: "Reviewed", status: currentProject.progress === 100 ? "done" : "current" },
-    { name: "Deploy", status: currentProject.progress === 100 ? "done" : "upcoming" },
-    { name: "Production", status: currentProject.progress === 100 ? "current" : "upcoming" },
-  ];
-
   return (
     <>
       {/* Intro Video & Animated Splash Screen */}
       {showIntro ? (
         <IntroSplashScreen onComplete={() => setShowIntro(false)} />
       ) : (
-        <div
-          className={`flex flex-col h-screen w-screen bg-[#05070B] text-zinc-100 overflow-hidden font-sans selection:bg-white selection:text-black animate-in fade-in duration-300 ${
-            isDragging ? "cursor-col-resize select-none" : ""
-          }`}
-        >
-          {/* Invisible Fullscreen Backdrop during Dragging */}
-          {isDragging && (
-            <div
-              className="fixed inset-0 z-50 cursor-col-resize select-none"
-              onMouseUp={() => setIsDragging(false)}
-            />
-          )}
-
+        <div className="flex flex-col h-screen w-screen min-h-[100dvh] bg-[#05070B] text-zinc-100 overflow-hidden font-sans selection:bg-white selection:text-black">
           {/* Universal Command Palette */}
           <CommandPalette
             isOpen={isCommandOpen}
@@ -481,13 +410,6 @@ export default function FullyCollapsibleAetherOS() {
                     <p className="text-[10px] text-zinc-500 mt-1">
                       If left blank, Aether uses its built-in Free AI Engine stream.
                     </p>
-                  </div>
-
-                  <div className="bg-[#05070B] p-3 rounded-lg border border-white/10 space-y-1 font-mono text-[11px]">
-                    <div className="text-zinc-400 font-semibold">Active Workspace Settings:</div>
-                    <div className="text-emerald-400">✓ Built-in Free AI Engine: Active</div>
-                    <div className="text-emerald-400">✓ Live Preview Sandbox: Enabled</div>
-                    <div className="text-emerald-400">✓ Auto-Save Checkpoints: Active</div>
                   </div>
                 </div>
 
@@ -627,7 +549,6 @@ export default function FullyCollapsibleAetherOS() {
                   </button>
                 </div>
 
-                {/* Launch Action Buttons: Open, Copy, Share */}
                 <div className="flex items-center justify-center gap-2 pt-1">
                   <a
                     href="/preview-frame"
@@ -643,12 +564,6 @@ export default function FullyCollapsibleAetherOS() {
                   >
                     <Copy className="w-3.5 h-3.5" /> {copiedUrl ? "Copied!" : "Copy"}
                   </button>
-                  <button
-                    onClick={() => alert(`Share URL copied: ${deployedUrl}`)}
-                    className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white font-semibold text-xs border border-white/10 transition-all"
-                  >
-                    <Share2 className="w-3.5 h-3.5" /> Share
-                  </button>
                 </div>
 
                 <button onClick={() => setShowDeploySuccessModal(false)} className="btn-secondary w-full text-xs">
@@ -658,251 +573,29 @@ export default function FullyCollapsibleAetherOS() {
             </div>
           )}
 
-          {/* Version Checkpoints Timeline Modal */}
-          {showVersionModal && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-in fade-in duration-150">
-              <div className="w-[95vw] max-w-lg bg-[#0D1117] border border-white/10 rounded-xl p-5 sm:p-6 space-y-4 os-panel relative shadow-2xl">
-                <button onClick={() => setShowVersionModal(false)} className="absolute top-4 right-4 text-zinc-400 hover:text-white">
-                  <X className="w-4 h-4" />
-                </button>
-                <div className="flex items-center gap-2 text-white font-semibold text-sm">
-                  <History className="w-4 h-4 text-emerald-400" /> Version Checkpoint Timeline & Diffs
-                </div>
-                <p className="text-xs text-zinc-400">
-                  Inspect feature additions or rollback to previous AI state checkpoints:
-                </p>
-
-                <div className="space-y-3 font-mono text-xs max-h-[60vh] overflow-y-auto">
-                  {versionHistory.map((ver) => (
-                    <div
-                      key={ver.id}
-                      className={`p-3 rounded-lg border space-y-2 transition-all ${
-                        ver.active
-                          ? "bg-white/10 border-white/40 text-white"
-                          : "bg-[#05070B] border-white/10 text-zinc-400 hover:text-white"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="font-semibold text-white flex items-center gap-1.5">
-                          {ver.label}
-                          {ver.active && <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400">Active</span>}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-[10px] text-zinc-500">{ver.time}</span>
-                          {!ver.active && (
-                            <button
-                              onClick={() => handleRestoreVersion(ver.id)}
-                              className="px-2 py-1 rounded bg-white/10 hover:bg-white hover:text-black text-white text-[10px] flex items-center gap-1 transition-all"
-                            >
-                              <RotateCcw className="w-3 h-3" /> Restore
-                            </button>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="text-[11px] space-y-0.5 pt-1 border-t border-white/10 text-zinc-300">
-                        {ver.diffs.map((diff, dIdx) => (
-                          <div key={dIdx} className="text-emerald-400 font-mono">
-                            {diff}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <button onClick={() => setShowVersionModal(false)} className="btn-secondary w-full">
-                  Close Checkpoints
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Intelligent Production Starter Kits & AI Customization Wizard Modal */}
-          {showNewProjectModal && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-in fade-in duration-150">
-              <div className="w-[95vw] max-w-xl bg-[#0D1117] border border-white/10 rounded-xl p-5 sm:p-6 space-y-4 os-panel relative shadow-2xl overflow-y-auto max-h-[90vh]">
-                <button onClick={() => setShowNewProjectModal(false)} className="absolute top-4 right-4 text-zinc-400 hover:text-white">
-                  <X className="w-4 h-4" />
-                </button>
-
-                <div className="flex items-center gap-2 text-white font-semibold text-sm uppercase tracking-wider border-b border-white/10 pb-3">
-                  <Wand2 className="w-5 h-5 text-emerald-400" /> AI Customization Wizard & Starter Kits
-                </div>
-
-                {isWizardGenerating ? (
-                  <div className="space-y-4 py-6 font-mono text-xs text-zinc-300">
-                    <div className="flex items-center gap-2 text-emerald-400 font-bold text-sm">
-                      <Sparkles className="w-5 h-5 animate-spin" /> Generating Custom Starter Kit...
-                    </div>
-                    <div className="space-y-2.5 bg-[#05070B] p-4 rounded-lg border border-white/10">
-                      {wizardSteps.map((step, idx) => (
-                        <div key={idx} className="flex items-center gap-2">
-                          {step.done ? (
-                            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                          ) : (
-                            <span className="w-4 h-4 rounded-full border border-white/20 animate-spin shrink-0" />
-                          )}
-                          <span className={step.done ? "text-white font-medium" : "text-zinc-500"}>
-                            {step.label}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    {/* Visual Template Cards */}
-                    <div>
-                      <div className="text-xs font-semibold text-white mb-2">1. Choose a Production Starter Kit</div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-sans">
-                        {projectTemplates.map((tpl) => (
-                          <button
-                            key={tpl.name}
-                            onClick={() => setSelectedTemplate(tpl.name)}
-                            className={`p-3 rounded-lg border text-left transition-all space-y-1.5 ${
-                              selectedTemplate === tpl.name
-                                ? "bg-white/10 border-white text-white font-semibold shadow-md"
-                                : "bg-[#05070B] border-white/10 text-zinc-400 hover:text-white hover:bg-white/5"
-                            }`}
-                          >
-                            <div className="flex items-center justify-between">
-                              <span className="font-bold text-xs">{tpl.name}</span>
-                              <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono">
-                                {tpl.setupTime}
-                              </span>
-                            </div>
-                            <div className="text-[10px] text-emerald-400 font-medium">Best for: {tpl.bestFor}</div>
-                            <div className="text-[10px] text-zinc-400 leading-relaxed font-normal">{tpl.desc}</div>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* AI Customization Inputs */}
-                    <div className="space-y-3 pt-2 border-t border-white/10">
-                      <div className="text-xs font-semibold text-white">2. Personalize Parameters</div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                        <div>
-                          <label className="text-zinc-400 font-medium mb-1 block">Project / Product Name</label>
-                          <input
-                            type="text"
-                            value={productName}
-                            onChange={(e) => setProductName(e.target.value)}
-                            className="w-full bg-[#05070B] border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:outline-none"
-                          />
-                        </div>
-                        <div>
-                          <label className="text-zinc-400 font-medium mb-1 block">Target Audience</label>
-                          <input
-                            type="text"
-                            value={targetAudience}
-                            onChange={(e) => setTargetAudience(e.target.value)}
-                            className="w-full bg-[#05070B] border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:outline-none"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                        <div>
-                          <label className="text-zinc-400 font-medium mb-1 block">Primary Goal</label>
-                          <select
-                            value={primaryGoal}
-                            onChange={(e) => setPrimaryGoal(e.target.value)}
-                            className="w-full bg-[#05070B] border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:outline-none"
-                          >
-                            <option value="Sell Subscriptions">Sell Subscriptions</option>
-                            <option value="Generate Leads">Generate Leads</option>
-                            <option value="Showcase Portfolio">Showcase Portfolio</option>
-                            <option value="Book Appointments">Book Appointments</option>
-                            <option value="Collect Emails">Collect Emails</option>
-                          </select>
-                        </div>
-                        <div>
-                          <label className="text-zinc-400 font-medium mb-1 block">Visual Theme</label>
-                          <select
-                            value={visualStyle}
-                            onChange={(e) => setVisualStyle(e.target.value)}
-                            className="w-full bg-[#05070B] border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:outline-none"
-                          >
-                            <option value="Glassmorphism Dark">Glassmorphism Dark Mode</option>
-                            <option value="Minimal Apple">Minimalist Apple White</option>
-                            <option value="Cyberpunk Neon">Cyberpunk Dark</option>
-                            <option value="Monochrome Minimal">Monochrome Black & White</option>
-                          </select>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-end gap-2 pt-2">
-                      <button onClick={() => setShowNewProjectModal(false)} className="btn-secondary">
-                        Cancel
-                      </button>
-                      <button onClick={handleCreateProject} className="btn-primary flex items-center gap-1.5">
-                        <Sparkles className="w-3.5 h-3.5" />
-                        <span>Launch Starter Kit</span>
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Context Evidence Inspector Modal */}
-          {showInspectorModal && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-150">
-              <div className="w-[95vw] max-w-lg bg-[#0D1117] border border-white/10 rounded-xl p-5 sm:p-6 space-y-4 os-panel relative shadow-2xl">
-                <button onClick={() => setShowInspectorModal(false)} className="absolute top-4 right-4 text-zinc-400 hover:text-white">
-                  <X className="w-4 h-4" />
-                </button>
-                <div className="flex items-center gap-2 text-white font-medium text-xs uppercase tracking-wider">
-                  <Eye className="w-4 h-4" strokeWidth={1.75} /> Context & Evidence Inspector
-                </div>
-                <h3 className="text-base font-medium text-white">Sources & Evidence Used by AI</h3>
-
-                <div className="space-y-3 text-xs text-zinc-300 bg-[#05070B] p-4 rounded-lg border border-white/5 font-mono">
-                  <div>
-                    <div className="text-[10px] text-zinc-500 uppercase">Referenced Project Files</div>
-                    <div className="text-[#10B981]">apps/web/app/page.tsx, DESIGN_CONSTITUTION.md</div>
-                  </div>
-                  <div>
-                    <div className="text-[10px] text-zinc-500 uppercase">Knowledge Base Memory</div>
-                    <div className="text-zinc-300">Qdrant Vector Collection: qdrant_active (Clean RAG State)</div>
-                  </div>
-                </div>
-
-                <button onClick={() => setShowInspectorModal(false)} className="btn-secondary w-full">
-                  Close Evidence Inspector
-                </button>
-              </div>
-            </div>
-          )}
-
           {/* Top Header Bar */}
-          <header className="h-13 border-b border-white/5 bg-[#080A0F]/90 backdrop-blur-md px-3 sm:px-4 flex items-center justify-between shrink-0 z-30 flex-wrap gap-2">
+          <header className="h-13 border-b border-white/5 bg-[#080A0F]/90 backdrop-blur-md px-3 sm:px-4 flex items-center justify-between shrink-0 z-30 gap-2">
             <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-              {/* Desktop Toggle Hide Workspace Sidebar Button */}
+              {/* Desktop Left Sidebar Toggle */}
               <button
                 onClick={() => setIsSidebarOpen((prev) => !prev)}
-                className="hidden md:flex p-1.5 rounded-lg bg-white/5 border border-white/10 hover:bg-white hover:text-black text-white transition-all shadow-sm"
+                className="hidden xl:flex p-1.5 rounded-lg bg-white/5 border border-white/10 hover:bg-white hover:text-black text-white transition-all shadow-sm"
                 title={isSidebarOpen ? "Hide Workspace Sidebar" : "Show Workspace Sidebar"}
               >
                 {isSidebarOpen ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeftOpen className="w-4 h-4" />}
               </button>
 
-              {/* Mobile Drawer Navigation Toggle Button */}
+              {/* Mobile / Tablet Drawer Navigation Toggle Button */}
               <button
                 onClick={() => setMobileMenuOpen((prev) => !prev)}
-                className="md:hidden p-1.5 rounded-lg bg-white/5 border border-white/10 text-white"
-                title="Toggle Mobile Menu"
+                className="xl:hidden p-1.5 rounded-lg bg-white/5 border border-white/10 text-white"
+                title="Toggle Navigation Menu"
               >
                 <Menu className="w-4 h-4" />
               </button>
 
               {/* User Custom Logo Brand Header */}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 shrink-0">
                 <img src="/logo.png?v=2" alt="Aether OS Logo" className="h-8 sm:h-9 w-auto max-w-[140px] sm:max-w-[180px] object-contain" />
                 <span className="font-bold text-xs text-white tracking-wider font-sans hidden sm:inline-block">AETHER OS</span>
               </div>
@@ -923,59 +616,35 @@ export default function FullyCollapsibleAetherOS() {
                   className="bg-[#05070B] border border-white text-xs text-white font-medium rounded px-2 py-0.5 focus:outline-none w-28 sm:w-auto"
                 />
               ) : (
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1.5 min-w-0">
                   <button
                     onClick={() => setIsHeaderEditing(true)}
                     title="Click to rename project"
-                    className="flex items-center gap-1 text-xs text-zinc-300 hover:text-white group max-w-[120px] sm:max-w-none truncate"
+                    className="flex items-center gap-1 text-xs text-zinc-300 hover:text-white group max-w-[100px] sm:max-w-[160px] truncate"
                   >
                     <Folder className="w-3.5 h-3.5 text-white shrink-0" strokeWidth={1.75} />
                     <span className="font-medium truncate">{currentProject.name}</span>
-                    <Edit2 className="w-3 h-3 opacity-0 group-hover:opacity-100 text-white transition-opacity shrink-0 hidden sm:inline-block" />
                   </button>
 
                   <button
                     onClick={() => setShowNewProjectModal(true)}
-                    className="flex items-center gap-1 px-2 py-0.5 rounded bg-white/10 border border-white/20 text-white hover:bg-white hover:text-black transition-all text-[11px] font-medium shrink-0"
+                    className="hidden sm:flex items-center gap-1 px-2 py-0.5 rounded bg-white/10 border border-white/20 text-white hover:bg-white hover:text-black transition-all text-[11px] font-medium shrink-0"
                   >
-                    <Plus className="w-3 h-3" /> <span className="hidden sm:inline">New</span>
+                    <Plus className="w-3 h-3" /> New
                   </button>
                 </div>
               )}
             </div>
 
-            {/* Command Search Launcher */}
-            <button
-              onClick={() => setIsCommandOpen(true)}
-              className="hidden lg:flex w-72 xl:w-80 items-center justify-between px-3 py-1.5 rounded-lg bg-[#05070B] border border-white/10 hover:border-white/40 text-xs text-zinc-400 hover:text-zinc-200 transition-all group cursor-pointer"
-            >
-              <div className="flex items-center gap-2">
-                <Search className="w-3.5 h-3.5 text-white" strokeWidth={1.75} />
-                <span className="text-zinc-400 group-hover:text-zinc-200 font-normal">Search actions, ask AI...</span>
-              </div>
-              <kbd className="px-1.5 py-0.5 rounded bg-zinc-900 text-[10px] text-zinc-400 font-mono border border-zinc-700 flex items-center gap-0.5">
-                <Command className="w-3 h-3" strokeWidth={1.75} /> K
-              </kbd>
-            </button>
-
-            {/* Mobile Search Icon Button */}
-            <button
-              onClick={() => setIsCommandOpen(true)}
-              className="lg:hidden p-1.5 rounded-lg bg-white/5 border border-white/10 text-white"
-              title="Search"
-            >
-              <Search className="w-4 h-4" />
-            </button>
-
             {/* Status, Version Checkpoints, and DEPLOY LIVE BUTTON */}
-            <div className="flex items-center gap-1.5 sm:gap-2 text-xs">
-              {/* Explainable Project Health Score & Trend Badge */}
+            <div className="flex items-center gap-1.5 sm:gap-2 text-xs shrink-0">
+              {/* Health Score Badge */}
               <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-mono text-[11px]">
                 <Activity className="w-3.5 h-3.5" />
                 <span className="font-bold">{projectHealth.total}/100</span>
               </div>
 
-              {/* 🚀 DEPLOY LIVE BUTTON */}
+              {/* DEPLOY LIVE BUTTON */}
               <button
                 onClick={() => setShowPreflightModal(true)}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-xs shadow-lg transition-all cursor-pointer shrink-0"
@@ -985,11 +654,11 @@ export default function FullyCollapsibleAetherOS() {
                 <span>Deploy Live</span>
               </button>
 
-              {/* Desktop Toggle Hide Right Project Completion Panel Button */}
+              {/* Right Inspector Toggle */}
               <button
                 onClick={() => setIsInspectorOpen((prev) => !prev)}
-                className="hidden md:flex items-center gap-1 p-1.5 rounded-lg bg-white/5 border border-white/10 hover:bg-white hover:text-black text-white transition-all text-xs shadow-sm"
-                title={isInspectorOpen ? "Hide Project Details Sidebar" : "Show Project Details Sidebar"}
+                className="p-1.5 rounded-lg bg-white/5 border border-white/10 hover:bg-white hover:text-black text-white transition-all text-xs shadow-sm"
+                title={isInspectorOpen ? "Hide Project Inspector" : "Show Project Inspector"}
               >
                 {isInspectorOpen ? <PanelRightClose className="w-4 h-4" /> : <PanelRightOpen className="w-4 h-4" />}
               </button>
@@ -998,10 +667,13 @@ export default function FullyCollapsibleAetherOS() {
 
           {/* Mobile Drawer Overlay Navigation Menu */}
           {mobileMenuOpen && (
-            <div className="md:hidden fixed inset-0 z-40 bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-150 flex flex-col justify-between">
-              <div className="space-y-4 pt-12">
+            <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md p-4 animate-in fade-in duration-150 flex flex-col justify-between">
+              <div className="space-y-4 pt-4">
                 <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                  <span className="font-bold text-sm text-white">Aether Workspace Navigation</span>
+                  <span className="font-bold text-sm text-white flex items-center gap-2">
+                    <img src="/logo.png?v=2" alt="Logo" className="h-6 w-auto" />
+                    Aether Navigation
+                  </span>
                   <button onClick={() => setMobileMenuOpen(false)} className="p-1 text-zinc-400 hover:text-white">
                     <X className="w-5 h-5" />
                   </button>
@@ -1014,7 +686,7 @@ export default function FullyCollapsibleAetherOS() {
                     { id: "code", title: "Code Workbench", icon: Code2 },
                     { id: "creative", title: "Visual Studio", icon: Palette },
                     { id: "rag", title: "Memory Vault", icon: Database },
-                    { id: "inspector", title: "Health Scorecard", icon: Activity },
+                    { id: "inspector", title: "Health & Next Actions", icon: Activity },
                   ].map((item) => {
                     const Icon = item.icon;
                     return (
@@ -1024,7 +696,7 @@ export default function FullyCollapsibleAetherOS() {
                           setActiveTab(item.id as any);
                           setMobileMenuOpen(false);
                         }}
-                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
+                        className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-colors ${
                           activeTab === item.id ? "bg-white text-black font-semibold" : "text-zinc-300 hover:bg-white/10"
                         }`}
                       >
@@ -1044,16 +716,67 @@ export default function FullyCollapsibleAetherOS() {
                 className="btn-secondary w-full py-3 flex items-center justify-center gap-2 text-xs"
               >
                 <Settings className="w-4 h-4" />
-                <span>Open Aether OS Settings</span>
+                <span>Aether OS Settings & Keys</span>
               </button>
             </div>
           )}
 
-          {/* Main Resizable Operating System Workspace */}
+          {/* Right Inspector Drawer Overlay for Screens < 1280px */}
+          {isInspectorOpen && (
+            <div className="xl:hidden fixed inset-y-0 right-0 z-40 w-80 max-w-[85vw] bg-[#080A0F] border-l border-white/10 p-4 space-y-4 shadow-2xl overflow-y-auto animate-in slide-in-from-right duration-200">
+              <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                <span className="font-bold text-xs text-white uppercase tracking-wider flex items-center gap-2">
+                  <Activity className="w-4 h-4 text-emerald-400" /> Project Inspector
+                </span>
+                <button onClick={() => setIsInspectorOpen(false)} className="p-1 text-zinc-400 hover:text-white">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Guided Checklist Panel */}
+              <div className="p-3.5 rounded-lg border border-emerald-500/30 bg-[#0D1117] space-y-2.5 font-mono text-xs">
+                <div className="flex items-center gap-1.5 text-white font-bold">
+                  <ListTodo className="w-4 h-4 text-emerald-400" />
+                  <span>Starter Kit Next Actions</span>
+                </div>
+                <div className="space-y-1 text-[11px] text-zinc-300">
+                  <div className="flex items-center gap-1.5 text-emerald-400">✓ Customize Hero & Branding</div>
+                  <div className="flex items-center gap-1.5 text-emerald-400">✓ Configure Primary Goal ({primaryGoal})</div>
+                  <div className="flex items-center gap-1.5 text-zinc-400">• Inspect Injected AI Context</div>
+                  <div className="flex items-center gap-1.5 text-zinc-400">• Run AI Pre-Flight Audit</div>
+                  <div className="flex items-center gap-1.5 text-zinc-400">• Launch Live Production URL</div>
+                </div>
+              </div>
+
+              {/* Health Scorecard Breakdown */}
+              <div className="p-3.5 rounded-lg border border-white/10 bg-[#0D1117] space-y-3 font-mono">
+                <div className="flex items-center justify-between border-b border-white/10 pb-2">
+                  <div className="flex items-center gap-1.5 text-xs text-white font-medium">
+                    <Activity className="w-4 h-4 text-emerald-400" />
+                    <span>Health Scorecard</span>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-xs font-bold text-emerald-400">{projectHealth.total} / 100</div>
+                  </div>
+                </div>
+
+                <div className="space-y-1 text-[11px]">
+                  {projectHealth.breakdown.map((item, idx) => (
+                    <div key={idx} className="flex items-center justify-between text-zinc-300 py-0.5">
+                      <span className="truncate">✓ {item.category}</span>
+                      <span className="font-semibold text-emerald-400">{item.score} / {item.max}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Main Resizable Workspace */}
           <div className="flex-1 flex overflow-hidden relative">
-            {/* Desktop Left Sidebar */}
+            {/* Desktop Left Sidebar (Only relative on XL screens 1280px+) */}
             {isSidebarOpen && (
-              <aside className="hidden md:flex w-52 border-r border-white/5 bg-[#080A0F]/80 backdrop-blur-md p-2 flex-col justify-between shrink-0 transition-all duration-200">
+              <aside className="hidden xl:flex w-52 border-r border-white/5 bg-[#080A0F]/80 backdrop-blur-md p-2 flex-col justify-between shrink-0 transition-all duration-200">
                 <div className="space-y-4">
                   <div>
                     <div className="text-[10px] font-medium uppercase tracking-wider text-zinc-500 px-2.5 mb-1.5 flex items-center justify-between">
@@ -1061,7 +784,6 @@ export default function FullyCollapsibleAetherOS() {
                       <button
                         onClick={() => setIsSidebarOpen(false)}
                         className="text-zinc-500 hover:text-white text-[10px]"
-                        title="Hide Workspace Sidebar"
                       >
                         Hide ✕
                       </button>
@@ -1093,22 +815,6 @@ export default function FullyCollapsibleAetherOS() {
                       })}
                     </div>
                   </div>
-
-                  {/* File Tree */}
-                  <div>
-                    <div className="text-[10px] font-medium uppercase tracking-wider text-zinc-500 px-2.5 mb-1.5 flex items-center justify-between">
-                      <span>Files</span>
-                      <span className="font-mono text-zinc-500">{currentProject.filesCount}</span>
-                    </div>
-                    <div className="space-y-0.5 text-xs text-zinc-400">
-                      {["page.tsx", "globals.css", "schema.prisma"].map((f) => (
-                        <div key={f} className="flex items-center gap-2 px-2.5 py-1 rounded hover:bg-white/[0.03] cursor-pointer hover:text-zinc-200 truncate transition-colors">
-                          <FileCode className="w-3.5 h-3.5 text-zinc-500 shrink-0" strokeWidth={1.75} />
-                          <span className="truncate text-[11px] font-mono">{f}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
                 </div>
 
                 <button
@@ -1121,7 +827,7 @@ export default function FullyCollapsibleAetherOS() {
               </aside>
             )}
 
-            {/* Responsive Main Canvas */}
+            {/* Responsive Main Canvas: TAKES 100% WIDTH ON ALL SCREENS BELOW XL */}
             <main className="flex-1 flex overflow-hidden p-1 sm:p-2 gap-0 bg-[#05070B] relative w-full">
               {activeTab === "creative" ? (
                 <div className="w-full h-full overflow-y-auto">
@@ -1136,7 +842,7 @@ export default function FullyCollapsibleAetherOS() {
                   <CodeWorkbench projectName={currentProject.name} />
                 </div>
               ) : activeTab === "inspector" ? (
-                <div className="w-full h-full overflow-y-auto p-4 space-y-4 font-mono text-xs">
+                <div className="w-full h-full overflow-y-auto p-3 space-y-3 font-mono text-xs">
                   <div className="p-4 rounded-lg border border-white/10 bg-[#0D1117] space-y-3">
                     <div className="flex items-center justify-between border-b border-white/10 pb-2">
                       <div className="flex items-center gap-2 text-sm text-white font-bold">
@@ -1155,11 +861,8 @@ export default function FullyCollapsibleAetherOS() {
                 </div>
               ) : (
                 <>
-                  {/* Desktop Split View or Mobile Full Width View */}
-                  <div
-                    style={{ width: typeof window !== "undefined" && window.innerWidth < 768 ? "100%" : `${leftWidthPercent}%` }}
-                    className="h-full pr-0 md:pr-1 shrink-0 overflow-hidden w-full md:w-auto"
-                  >
+                  {/* XL Desktop Split View or 100% Full Width View on Mobile/Tablet */}
+                  <div className="h-full w-full xl:w-auto xl:flex-1 shrink-0 overflow-hidden">
                     <AIChatStudio
                       projectName={currentProject.name}
                       onRenameProject={handleRename}
@@ -1167,31 +870,16 @@ export default function FullyCollapsibleAetherOS() {
                     />
                   </div>
 
-                  {/* Desktop Split Handle */}
-                  <div
-                    onMouseDown={(e) => {
-                      e.preventDefault();
-                      setIsDragging(true);
-                    }}
-                    className="hidden md:flex w-3 h-full items-center justify-center hover:bg-white/20 cursor-col-resize group transition-colors shrink-0 z-30 select-none"
-                    title="Drag left/right to resize panels"
-                  >
-                    <div className="w-1 h-10 bg-white/30 group-hover:bg-white rounded-full transition-colors" />
-                  </div>
-
-                  <div
-                    style={{ width: `${100 - leftWidthPercent}%` }}
-                    className="hidden md:flex h-full pl-1 flex-1 overflow-hidden"
-                  >
+                  <div className="hidden xl:flex h-full pl-1 flex-1 overflow-hidden">
                     <CodeWorkbench projectName={currentProject.name} />
                   </div>
                 </>
               )}
             </main>
 
-            {/* Desktop Right Inspector */}
+            {/* Desktop Right Inspector (Only relative on XL screens 1280px+) */}
             {isInspectorOpen && (
-              <aside className="hidden md:flex w-64 border-l border-white/5 bg-[#080A0F]/80 backdrop-blur-md p-3.5 space-y-4 shrink-0 overflow-y-auto transition-all duration-200">
+              <aside className="hidden xl:flex w-64 border-l border-white/5 bg-[#080A0F]/80 backdrop-blur-md p-3.5 space-y-4 shrink-0 overflow-y-auto transition-all duration-200">
                 {/* Onboarding Next Steps Guided Checklist Panel */}
                 <div className="p-3.5 rounded-lg border border-emerald-500/30 bg-[#0D1117] space-y-2.5 font-mono text-xs">
                   <div className="flex items-center gap-1.5 text-white font-bold">
@@ -1216,78 +904,24 @@ export default function FullyCollapsibleAetherOS() {
                     </div>
                     <div className="text-right">
                       <div className="text-xs font-bold text-emerald-400">{projectHealth.total} / 100</div>
-                      <div className="text-[9px] text-emerald-400/80">Trend: {projectHealth.trend} today</div>
                     </div>
                   </div>
 
                   <div className="space-y-1 text-[11px]">
-                    <div className="text-[9px] text-zinc-500 uppercase font-semibold mb-1">🔴 Blocking Issues (0)</div>
-                    {projectHealth.breakdown.filter(b => b.type === "blocking").map((item, idx) => (
+                    {projectHealth.breakdown.map((item, idx) => (
                       <div key={idx} className="flex items-center justify-between text-zinc-300">
                         <span className="truncate">✓ {item.category}</span>
                         <span className="font-semibold text-emerald-400">{item.score} / {item.max}</span>
                       </div>
                     ))}
-                    <div className="text-[9px] text-zinc-500 uppercase font-semibold mt-2 mb-1">🟡 Advisory Issues ({projectHealth.advisoryCount})</div>
-                    {projectHealth.breakdown.filter(b => b.type === "advisory").map((item, idx) => (
-                      <div key={idx} className="flex items-center justify-between text-zinc-300">
-                        <span className="truncate">{item.score === item.max ? "✓" : "•"} {item.category}</span>
-                        <span className={`font-semibold ${item.score === item.max ? "text-emerald-400" : "text-amber-400"}`}>
-                          {item.score} / {item.max}
-                        </span>
-                      </div>
-                    ))}
                   </div>
                 </div>
-
-                {/* Progress Component */}
-                <div className="p-3.5 rounded-lg border border-white/5 bg-[#0D1117] space-y-2.5 relative group">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-zinc-400 font-normal">Project Completion</span>
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono font-medium text-[#10B981]">{currentProject.progress}%</span>
-                      <button
-                        onClick={() => setIsInspectorOpen(false)}
-                        className="text-zinc-500 hover:text-white text-[11px] px-1 py-0.5 rounded hover:bg-white/10"
-                        title="Hide Project Details Sidebar"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="w-full bg-[#05070B] rounded-full h-1.5 overflow-hidden">
-                    <div
-                      className="bg-[#10B981] h-full rounded-full transition-all duration-300"
-                      style={{ width: `${currentProject.progress}%` }}
-                    />
-                  </div>
-
-                  <div className="pt-1">
-                    <button
-                      onClick={() => setShowPreflightModal(true)}
-                      className="btn-primary w-full text-xs"
-                    >
-                      {currentProject.nextAction}
-                      <ArrowRight className="w-3.5 h-3.5" strokeWidth={1.75} />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Context Inspector Trigger */}
-                <button
-                  onClick={() => setShowInspectorModal(true)}
-                  className="btn-secondary w-full text-zinc-400 hover:text-white"
-                >
-                  <HelpCircle className="w-3.5 h-3.5 text-white" strokeWidth={1.75} />
-                  Context Evidence
-                </button>
               </aside>
             )}
           </div>
 
-          {/* Mobile Touch Bottom Navigation Bar (< 768px) */}
-          <nav className="md:hidden h-14 bg-[#080A0F] border-t border-white/10 flex items-center justify-around shrink-0 px-1 z-30 font-sans">
+          {/* Touch Bottom Navigation Bar for Screens < 1280px */}
+          <nav className="xl:hidden h-14 bg-[#080A0F] border-t border-white/10 flex items-center justify-around shrink-0 px-1 z-30 font-sans">
             {[
               { id: "workspace", title: "AI Studio", icon: MessageSquareCode },
               { id: "code", title: "Workbench", icon: Code2 },
