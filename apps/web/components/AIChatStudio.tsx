@@ -308,18 +308,20 @@ export function AIChatStudio({
             const delta = parsed.choices?.[0]?.delta?.content || "";
             fullContent += delta;
 
-            setMessages((prev) =>
-              prev.map((msg) =>
-                msg.id === assistantMsgId
-                  ? {
-                      ...msg,
-                      content: fullContent,
-                      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-                      model: parsed.model || selectedModel,
-                    }
-                  : msg
-              )
-            );
+            setMessages((prev) => {
+              if (prev.length === 0) return prev;
+              const copy = [...prev];
+              const lastIdx = copy.length - 1;
+              if (copy[lastIdx].id === assistantMsgId) {
+                copy[lastIdx] = {
+                  ...copy[lastIdx],
+                  content: fullContent,
+                  timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+                  model: parsed.model || selectedModel,
+                };
+              }
+              return copy;
+            });
           } catch {
             // Ignore non-JSON chunk noise
           }

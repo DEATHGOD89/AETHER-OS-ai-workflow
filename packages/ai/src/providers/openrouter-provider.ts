@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 import { ChatMessage, StreamChatRequest } from "@aether/shared";
-import { BaseAIProvider, AIProviderResponse } from "./abstract-provider.js";
+import { BaseAIProvider, AIProviderResponse } from "./abstract-provider";
 
 export class OpenRouterProvider extends BaseAIProvider {
   name = "openrouter";
@@ -8,7 +8,11 @@ export class OpenRouterProvider extends BaseAIProvider {
 
   constructor(apiKey?: string) {
     super();
-    const key = apiKey || process.env.OPENROUTER_API_KEY || "sk-or-v1-demo-key";
+    const key = apiKey || process.env.OPENROUTER_API_KEY;
+    if (!key) {
+      throw new Error("OPENROUTER_API_KEY environment variable is not configured.");
+    }
+
     this.client = new OpenAI({
       apiKey: key,
       baseURL: process.env.OPENROUTER_BASE_URL || "https://openrouter.ai/api/v1",

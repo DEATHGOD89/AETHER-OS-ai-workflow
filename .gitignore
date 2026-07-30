@@ -20,3 +20,6 @@ Thumbs.db
 
 # System generated logs
 *.log
+
+# Nested clone folders
+AETHER-OS-ai-workflow/

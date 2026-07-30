@@ -90,7 +90,7 @@ export function CodeWorkbench({ projectName }: { projectName: string }) {
   const [isResizingSplit, setIsResizingSplit] = useState(false);
 
   // Debounce ref for localStorage writes to avoid UI jank
-  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Sync initial code to localStorage
   useEffect(() => {

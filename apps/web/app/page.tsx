@@ -35,22 +35,30 @@ import {
   Copy,
   ExternalLink,
   Share2,
-  LayoutTemplate,
   Wand2,
   ListTodo,
+  Key,
 } from "lucide-react";
 import { CommandPalette } from "@/components/CommandPalette";
 import { AIChatStudio } from "@/components/AIChatStudio";
 import { CodeWorkbench } from "@/components/CodeWorkbench";
+import { CreativeStudio } from "@/components/CreativeStudio";
+import { RAGKnowledgeStudio } from "@/components/RAGKnowledgeStudio";
+import { AutomationStudio } from "@/components/AutomationStudio";
 import { IntroSplashScreen } from "@/components/IntroSplashScreen";
 
 export default function FullyCollapsibleAetherOS() {
   const [showIntro, setShowIntro] = useState(true);
   const [isCommandOpen, setIsCommandOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<"workspace" | "chat" | "code" | "creative" | "rag">("workspace");
+  const [activeTab, setActiveTab] = useState<"workspace" | "chat" | "code" | "creative" | "rag" | "workflow">("workspace");
   const [showInspectorModal, setShowInspectorModal] = useState(false);
   const [showNewProjectModal, setShowNewProjectModal] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [isHeaderEditing, setIsHeaderEditing] = useState(false);
+
+  // Settings State
+  const [customApiKey, setCustomApiKey] = useState("");
+  const [savedApiKeyMsg, setSavedApiKeyMsg] = useState(false);
 
   // Phase 1 Modals: Launch Event, AI Pre-flight Review, and Version Checkpoint Diffs
   const [showPreflightModal, setShowPreflightModal] = useState(false);
@@ -196,6 +204,18 @@ export default function FullyCollapsibleAetherOS() {
     },
   ];
 
+  // Load custom API key from localStorage
+  useEffect(() => {
+    const key = localStorage.getItem("aether_openrouter_api_key");
+    if (key) setCustomApiKey(key);
+  }, []);
+
+  const handleSaveApiKey = () => {
+    localStorage.setItem("aether_openrouter_api_key", customApiKey);
+    setSavedApiKeyMsg(true);
+    setTimeout(() => setSavedApiKeyMsg(false), 2000);
+  };
+
   // Global Key Listener for Ctrl+K / Cmd+K
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -268,7 +288,7 @@ export default function FullyCollapsibleAetherOS() {
       setLaunchSteps((prev) => prev.map((s) => ({ ...s, done: true })));
       setIsDeploying(false);
       setShowPreflightModal(false);
-      const url = `https://${currentProject.name.toLowerCase().replace(/\s+/g, "-")}.aether.app`;
+      const url = typeof window !== "undefined" ? window.location.origin : `https://${currentProject.name.toLowerCase().replace(/\s+/g, "-")}.aether.app`;
       setDeployedUrl(url);
       setShowDeploySuccessModal(true);
       setCurrentProject((prev) => ({
@@ -429,6 +449,62 @@ export default function FullyCollapsibleAetherOS() {
             onClose={() => setIsCommandOpen(false)}
             onSelectTab={(tabId) => setActiveTab(tabId as any)}
           />
+
+          {/* Settings Modal */}
+          {showSettingsModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-in fade-in duration-150">
+              <div className="w-full max-w-md bg-[#0D1117] border border-white/10 rounded-xl p-6 space-y-4 os-panel relative shadow-2xl">
+                <button onClick={() => setShowSettingsModal(false)} className="absolute top-4 right-4 text-zinc-400 hover:text-white">
+                  <X className="w-4 h-4" />
+                </button>
+
+                <div className="flex items-center gap-2 text-white font-semibold text-sm uppercase tracking-wider border-b border-white/10 pb-3">
+                  <Settings className="w-5 h-5 text-emerald-400" /> Aether OS Settings & API Keys
+                </div>
+
+                <div className="space-y-4 text-xs">
+                  <div>
+                    <label className="text-zinc-400 font-medium mb-1 block flex items-center gap-1.5">
+                      <Key className="w-3.5 h-3.5 text-emerald-400" /> Custom OpenRouter API Key (Optional)
+                    </label>
+                    <input
+                      type="password"
+                      placeholder="sk-or-v1-..."
+                      value={customApiKey}
+                      onChange={(e) => setCustomApiKey(e.target.value)}
+                      className="w-full bg-[#05070B] border border-white/10 rounded-lg px-3 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-white/50 font-mono"
+                    />
+                    <p className="text-[10px] text-zinc-500 mt-1">
+                      If left blank, Aether uses its built-in Free AI Engine stream.
+                    </p>
+                  </div>
+
+                  <div className="bg-[#05070B] p-3 rounded-lg border border-white/10 space-y-1 font-mono text-[11px]">
+                    <div className="text-zinc-400 font-semibold">Active Workspace Settings:</div>
+                    <div className="text-emerald-400">✓ Built-in Free AI Engine: Active</div>
+                    <div className="text-emerald-400">✓ Live Preview Sandbox: Enabled</div>
+                    <div className="text-emerald-400">✓ Auto-Save Checkpoints: Active</div>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-2">
+                  {savedApiKeyMsg ? (
+                    <span className="text-xs text-emerald-400 font-mono">✓ Settings Saved!</span>
+                  ) : (
+                    <span />
+                  )}
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => setShowSettingsModal(false)} className="btn-secondary">
+                      Close
+                    </button>
+                    <button onClick={handleSaveApiKey} className="btn-primary">
+                      Save Settings
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* AI Pre-Flight Review & Deploy Modal */}
           {showPreflightModal && (
@@ -974,7 +1050,10 @@ export default function FullyCollapsibleAetherOS() {
                   </div>
                 </div>
 
-                <button className="btn-secondary w-full justify-start text-zinc-400 hover:text-white">
+                <button
+                  onClick={() => setShowSettingsModal(true)}
+                  className="btn-secondary w-full justify-start text-zinc-400 hover:text-white cursor-pointer"
+                >
                   <Settings className="w-4 h-4" strokeWidth={1.75} />
                   Settings
                 </button>
@@ -983,36 +1062,48 @@ export default function FullyCollapsibleAetherOS() {
 
             {/* Resizable Central Workspace Canvas Panes */}
             <main className="flex-1 flex overflow-hidden p-2 gap-0 bg-[#05070B] relative">
-              {activeTab === "workspace" || activeTab === "chat" ? (
-                <div style={{ width: `${leftWidthPercent}%` }} className="h-full pr-1 shrink-0 overflow-hidden">
-                  <AIChatStudio
-                    projectName={currentProject.name}
-                    onRenameProject={handleRename}
-                    onNewProject={() => setShowNewProjectModal(true)}
-                  />
+              {activeTab === "creative" ? (
+                <div className="w-full h-full overflow-y-auto">
+                  <CreativeStudio projectName={currentProject.name} />
                 </div>
-              ) : null}
+              ) : activeTab === "rag" ? (
+                <div className="w-full h-full overflow-y-auto">
+                  <RAGKnowledgeStudio projectName={currentProject.name} />
+                </div>
+              ) : activeTab === "code" ? (
+                <div className="w-full h-full overflow-hidden">
+                  <CodeWorkbench projectName={currentProject.name} />
+                </div>
+              ) : (
+                <>
+                  <div style={{ width: `${leftWidthPercent}%` }} className="h-full pr-1 shrink-0 overflow-hidden">
+                    <AIChatStudio
+                      projectName={currentProject.name}
+                      onRenameProject={handleRename}
+                      onNewProject={() => setShowNewProjectModal(true)}
+                    />
+                  </div>
 
-              {/* Draggable Resizable Split Handle */}
-              {(activeTab === "workspace" || activeTab === "chat") && (
-                <div
-                  onMouseDown={(e) => {
-                    e.preventDefault();
-                    setIsDragging(true);
-                  }}
-                  className="w-3 h-full flex items-center justify-center hover:bg-white/20 cursor-col-resize group transition-colors shrink-0 z-30 select-none"
-                  title="Drag left/right to resize panels"
-                >
-                  <div className="w-1 h-10 bg-white/30 group-hover:bg-white rounded-full transition-colors" />
-                </div>
+                  {/* Draggable Resizable Split Handle */}
+                  <div
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      setIsDragging(true);
+                    }}
+                    className="w-3 h-full flex items-center justify-center hover:bg-white/20 cursor-col-resize group transition-colors shrink-0 z-30 select-none"
+                    title="Drag left/right to resize panels"
+                  >
+                    <div className="w-1 h-10 bg-white/30 group-hover:bg-white rounded-full transition-colors" />
+                  </div>
+
+                  <div
+                    style={{ width: `${100 - leftWidthPercent}%` }}
+                    className="h-full pl-1 flex-1 overflow-hidden"
+                  >
+                    <CodeWorkbench projectName={currentProject.name} />
+                  </div>
+                </>
               )}
-
-              <div
-                style={{ width: activeTab === "workspace" || activeTab === "chat" ? `${100 - leftWidthPercent}%` : "100%" }}
-                className="h-full pl-1 flex-1 overflow-hidden"
-              >
-                <CodeWorkbench projectName={currentProject.name} />
-              </div>
             </main>
 
             {/* Right High-Density Linear Inspector */}
