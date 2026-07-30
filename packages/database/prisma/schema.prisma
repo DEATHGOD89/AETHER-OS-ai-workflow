@@ -1,0 +1,227 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+enum AssetType {
+  IMAGE
+  VIDEO
+  AUDIO
+  DOCUMENT
+  CODE
+  MODEL_WEIGHTS
+}
+
+model User {
+  id            String         @id @default(cuid())
+  email         String         @unique
+  name          String?
+  avatarUrl     String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  memberships   Member[]
+  projects      Project[]      @relation("CreatedProjects")
+  chats         Chat[]
+  prompts       Prompt[]
+  subscriptions Subscription[]
+  auditLogs     AuditLog[]
+}
+
+model Organization {
+  id          String      @id @default(cuid())
+  name        String
+  slug        String      @unique
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  members     Member[]
+  workspaces  Workspace[]
+}
+
+model Member {
+  id             String       @id @default(cuid())
+  role           Role         @default(MEMBER)
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, organizationId])
+}
+
+model Workspace {
+  id             String       @id @default(cuid())
+  name           String
+  slug           String
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  projects       Project[]
+
+  @@unique([organizationId, slug])
+}
+
+model Project {
+  id           String      @id @default(cuid())
+  name         String
+  description  String?
+  workspaceId  String
+  workspace    Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  creatorId    String
+  creator      User        @relation("CreatedProjects", fields: [creatorId], references: [id])
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  folders      Folder[]
+  files        File[]
+  assets       Asset[]
+  chats        Chat[]
+  prompts      Prompt[]
+  workflows    Workflow[]
+  agents       Agent[]
+  vectorStore  VectorIndex?
+}
+
+model Folder {
+  id        String   @id @default(cuid())
+  name      String
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  parentId  String?
+  parent    Folder?  @relation("ParentFolder", fields: [parentId], references: [id])
+  children  Folder[] @relation("ParentFolder")
+  files     File[]
+  createdAt DateTime @default(now())
+}
+
+model File {
+  id        String   @id @default(cuid())
+  name      String
+  path      String
+  content   String?  @db.Text
+  mimeType  String
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  folderId  String?
+  folder    Folder?  @relation(fields: [folderId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Asset {
+  id           String    @id @default(cuid())
+  name         String
+  type         AssetType
+  url          String
+  s3Key        String
+  size         Int
+  metadata     Json?
+  projectId    String
+  project      Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdAt    DateTime  @default(now())
+}
+
+model Chat {
+  id        String    @id @default(cuid())
+  title     String
+  projectId String
+  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User      @relation(fields: [userId], references: [id])
+  messages  Message[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  chatId    String
+  chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  role      String
+  content   String   @db.Text
+  model     String?
+  tokens    Int?
+  metadata  Json?
+  createdAt DateTime @default(now())
+}
+
+model Prompt {
+  id          String   @id @default(cuid())
+  title       String
+  template    String   @db.Text
+  tags        String[]
+  isPublic    Boolean  @default(false)
+  projectId   String?
+  project     Project? @relation(fields: [projectId], references: [id])
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id])
+  createdAt   DateTime @default(now())
+}
+
+model Workflow {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  definition  Json
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Agent {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  systemMsg   String   @db.Text
+  tools       String[]
+  model       String
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+}
+
+model VectorIndex {
+  id               String   @id @default(cuid())
+  projectId        String   @unique
+  project          Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  qdrantCollection String
+  documentCount    Int      @default(0)
+  updatedAt        DateTime @updatedAt
+}
+
+model Subscription {
+  id               String   @id @default(cuid())
+  userId           String
+  user             User     @relation(fields: [userId], references: [id])
+  stripeSubId      String?  @unique
+  plan             String
+  status           String
+  currentPeriodEnd DateTime
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  action    String
+  entity    String
+  entityId  String
+  payload   Json?
+  createdAt DateTime @default(now())
+}

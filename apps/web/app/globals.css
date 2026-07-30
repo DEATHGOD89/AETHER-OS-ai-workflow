@@ -1,0 +1,119 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: #05070B;
+    --surface: #0D1117;
+    --surface-hover: #151B26;
+    --border: rgba(255, 255, 255, 0.08);
+    --primary: #FFFFFF;
+    --accent: #FFFFFF;
+    --accent-glow: rgba(255, 255, 255, 0.15);
+    --success: #10B981;
+    --warning: #F59E0B;
+    --danger: #EF4444;
+    --foreground: #FFFFFF;
+    --muted: #A1A1AA;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    overflow: hidden;
+  }
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: #05070B;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Deep Obsidian Glass Panels */
+.os-panel {
+  background: rgba(13, 17, 23, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.os-card {
+  background: rgba(21, 27, 38, 0.4);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  transition: all 0.15s ease;
+}
+
+.os-card:hover {
+  background: rgba(21, 27, 38, 0.7);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Minimalist Monochrome White OS Button Styling */
+.btn-primary {
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 8px;
+  background: #FFFFFF;
+  color: #05070B;
+  font-weight: 600;
+  font-size: 12px;
+  border: 1px solid #FFFFFF;
+  box-shadow: 0 2px 8px 0 rgba(255, 255, 255, 0.12);
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.btn-primary:hover {
+  background: #E5E7EB;
+  border-color: #E5E7EB;
+  box-shadow: 0 4px 12px 0 rgba(255, 255, 255, 0.2);
+}
+
+.btn-secondary {
+  height: 38px;
+  padding: 0 14px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #F4F4F5;
+  font-weight: 500;
+  font-size: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #FFFFFF;
+}
+
+.sidebar-item-active {
+  background: rgba(255, 255, 255, 0.1);
+  border-left: 2px solid #FFFFFF;
+  color: #FFFFFF;
+  font-weight: 600;
+}

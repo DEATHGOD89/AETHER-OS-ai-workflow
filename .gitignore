@@ -1,0 +1,22 @@
+# Node modules
+node_modules/
+.pnpm-store/
+
+# Next.js & Turbo build outputs
+.next/
+.turbo/
+dist/
+build/
+out/
+
+# Environment files and secrets
+.env
+.env.*
+!.env.example
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# System generated logs
+*.log
